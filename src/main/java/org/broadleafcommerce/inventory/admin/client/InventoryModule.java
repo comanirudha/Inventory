@@ -41,10 +41,11 @@ public class InventoryModule extends AbstractModule {
         setSection(
                 BLCMain.getMessageManager().getString("fulfillmentLocationMainTitle"),
                 "fulfillmentLocations",
-                "org.broadleafcommerce.admin.client.view.catalog.inventory.FulfillmentLocationView",
+                "org.broadleafcommerce.inventory.admin.client.view.FulfillmentLocationView",
                 "fulfillmentLocationPresenter",
-                "org.broadleafcommerce.admin.client.presenter.catalog.inventory.FulfillmentLocationPresenter",
+                "org.broadleafcommerce.inventory.admin.client.presenter.FulfillmentLocationPresenter",
                 fulfillmentLocationPermissions
         );
     }
+    
 }
