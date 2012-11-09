@@ -18,6 +18,9 @@ package org.broadleafcommerce.inventory.admin.client;
 
 import org.broadleafcommerce.openadmin.client.AbstractModule;
 import org.broadleafcommerce.openadmin.client.BLCMain;
+import org.broadleafcommerce.openadmin.client.i18nConstants;
+
+import com.google.gwt.core.client.GWT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ public class InventoryModule extends AbstractModule {
 
     @Override
     public void onModuleLoad() {
+        addConstants(GWT.<i18nConstants>create(InventoryMessages.class));
         setModuleKey("BLCMerchandising");
         
         List<String> fulfillmentLocationPermissions = new ArrayList<String>();
