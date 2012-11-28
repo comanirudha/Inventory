@@ -50,6 +50,8 @@ public class InventoryModule extends AbstractModule {
                 "org.broadleafcommerce.inventory.admin.client.presenter.FulfillmentLocationPresenter",
                 fulfillmentLocationPermissions
         );
+        
+        registerModule();
     }
     
 }
