@@ -5,7 +5,7 @@
 
     <named-query name="BC_UPDATE_ALL_FULFILLMENT_LOCATIONS_TO_NOT_DEFAULT">
         <query>
-            UPDATE org.broadleafcommerce.core.inventory.domain.FulfillmentLocation fulfillmentLocation
+            UPDATE org.broadleafcommerce.inventory.domain.FulfillmentLocation fulfillmentLocation
             SET fulfillmentLocation.defaultLocation = false
             WHERE fulfillmentLocationId != :fulfillmentLocationId
         </query>
@@ -14,7 +14,7 @@
     <named-query name="BC_READ_ALL_FULFILLMENT_LOCATIONS">
         <query>
             SELECT fulfillmentLocation
-            FROM org.broadleafcommerce.core.inventory.domain.FulfillmentLocation fulfillmentLocation
+            FROM org.broadleafcommerce.inventory.domain.FulfillmentLocation fulfillmentLocation
         </query>
     </named-query>
 

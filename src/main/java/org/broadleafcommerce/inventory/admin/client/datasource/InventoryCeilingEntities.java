@@ -23,7 +23,7 @@ package org.broadleafcommerce.inventory.admin.client.datasource;
  */
 public class InventoryCeilingEntities {
 
-    public static final String FULFILLMENT_LOCATION = "org.broadleafcommerce.core.inventory.domain.FulfillmentLocation";
-    public static final String INVENTORY = "org.broadleafcommerce.core.inventory.domain.Inventory";
+    public static final String FULFILLMENT_LOCATION = "org.broadleafcommerce.inventory.domain.FulfillmentLocation";
+    public static final String INVENTORY = "org.broadleafcommerce.inventory.domain.Inventory";
 
 }

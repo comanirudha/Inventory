@@ -5,14 +5,14 @@
 
     <named-query name="BC_READ_SKU_INVENTORY_FOR_LOCATION">
         <query>
-            SELECT inventory FROM org.broadleafcommerce.core.inventory.domain.Inventory inventory
+            SELECT inventory FROM org.broadleafcommerce.inventory.domain.Inventory inventory
             WHERE inventory.sku.id = :skuId AND inventory.fulfillmentLocation.id = :fulfillmentLocationId
         </query>
     </named-query>
 
     <named-query name="BC_READ_SKU_INVENTORY_FOR_DEFAULT_LOCATION">
         <query>
-            SELECT inventory FROM org.broadleafcommerce.core.inventory.domain.Inventory inventory
+            SELECT inventory FROM org.broadleafcommerce.inventory.domain.Inventory inventory
             WHERE inventory.fulfillmentLocation.shippingLocation = true AND inventory.fulfillmentLocation.defaultLocation = true AND inventory.sku.id = :skuId
         </query>
     </named-query>
@@ -20,7 +20,7 @@
     <named-query name="BC_READ_INVENTORY_FOR_FULFILLMENT_LOCATION">
         <query>
             SELECT inventory
-            FROM org.broadleafcommerce.core.inventory.domain.Inventory inventory
+            FROM org.broadleafcommerce.inventory.domain.Inventory inventory
             WHERE inventory.fulfillmentLocation.id = :fulfillmentLocationId
         </query>
     </named-query>
@@ -32,7 +32,7 @@
             WHERE sku.id NOT IN
                 (
                     SELECT inventory.sku.id
-                    FROM org.broadleafcommerce.core.inventory.domain.Inventory inventory
+                    FROM org.broadleafcommerce.inventory.domain.Inventory inventory
                     WHERE inventory.fulfillmentLocation.id = :fulfillmentLocationId
                 )
         </query>

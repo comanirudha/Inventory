@@ -7,8 +7,8 @@
     <persistence-unit name="blPU" transaction-type="RESOURCE_LOCAL">
         <mapping-file>config/bc/jpa/domain/Inventory.orm.xml</mapping-file>
         <mapping-file>config/bc/jpa/domain/FulfillmentLocation.orm.xml</mapping-file>
-        <class>org.broadleafcommerce.core.inventory.domain.InventoryImpl</class>
-        <class>org.broadleafcommerce.core.inventory.domain.FulfillmentLocationImpl</class>
+        <class>org.broadleafcommerce.inventory.domain.InventoryImpl</class>
+        <class>org.broadleafcommerce.inventory.domain.FulfillmentLocationImpl</class>
         <exclude-unlisted-classes/>
     </persistence-unit>
 
