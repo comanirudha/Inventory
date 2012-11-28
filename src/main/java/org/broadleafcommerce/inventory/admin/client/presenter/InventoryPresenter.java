@@ -15,12 +15,6 @@
  */
 package org.broadleafcommerce.inventory.admin.client.presenter;
 
-import com.smartgwt.client.data.DSCallback;
-import com.smartgwt.client.data.DSRequest;
-import com.smartgwt.client.data.DSResponse;
-import com.smartgwt.client.widgets.events.ClickEvent;
-import com.smartgwt.client.widgets.events.ClickHandler;
-import com.smartgwt.client.widgets.grid.events.*;
 import org.broadleafcommerce.common.presentation.client.PersistencePerspectiveItemType;
 import org.broadleafcommerce.openadmin.client.BLCMain;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.DynamicEntityDataSource;
@@ -29,26 +23,43 @@ import org.broadleafcommerce.openadmin.client.presenter.structure.CreateBasedLis
 import org.broadleafcommerce.openadmin.client.view.dynamic.form.FormHiddenEnum;
 import org.broadleafcommerce.openadmin.client.view.dynamic.grid.GridStructureDisplay;
 
+import com.smartgwt.client.data.DSCallback;
+import com.smartgwt.client.data.DSRequest;
+import com.smartgwt.client.data.DSResponse;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.grid.events.CellDoubleClickEvent;
+import com.smartgwt.client.widgets.grid.events.CellDoubleClickHandler;
+import com.smartgwt.client.widgets.grid.events.DataArrivedEvent;
+import com.smartgwt.client.widgets.grid.events.DataArrivedHandler;
+import com.smartgwt.client.widgets.grid.events.EditCompleteEvent;
+import com.smartgwt.client.widgets.grid.events.EditCompleteHandler;
+import com.smartgwt.client.widgets.grid.events.SelectionChangedHandler;
+import com.smartgwt.client.widgets.grid.events.SelectionEvent;
+
 public class InventoryPresenter extends CreateBasedListStructurePresenter {
 
     public InventoryPresenter(GridStructureDisplay display, String editDialogTitle) {
-        super(display, editDialogTitle);
+        super("", display, editDialogTitle);
     }
 
     @Override
     public void bind() {
         dataArrivedHandlerRegistration = display.getGrid().addDataArrivedHandler(new DataArrivedHandler() {
+            @Override
             public void onDataArrived(DataArrivedEvent event) {
                 display.getRemoveButton().disable();
             }
         });
         editCompletedHandlerRegistration = display.getGrid().addEditCompleteHandler(new EditCompleteHandler() {
+            @Override
             public void onEditComplete(EditCompleteEvent event) {
                 display.getGrid().deselectAllRecords();
                 setStartState();
             }
         });
         selectionChangedHandlerRegistration = display.getGrid().addSelectionChangedHandler(new SelectionChangedHandler() {
+            @Override
             public void onSelectionChanged(SelectionEvent event) {
                 if (event.getState()) {
                     display.getRemoveButton().enable();
@@ -58,9 +69,11 @@ public class InventoryPresenter extends CreateBasedListStructurePresenter {
             }
         });
         removedClickedHandlerRegistration = display.getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
             public void onClick(ClickEvent event) {
                 if (event.isLeftButtonDown()) {
                     display.getGrid().removeData(display.getGrid().getSelectedRecord(), new DSCallback() {
+                        @Override
                         public void execute(DSResponse response, Object rawData, DSRequest request) {
                             display.getRemoveButton().disable();
                         }
@@ -69,6 +82,7 @@ public class InventoryPresenter extends CreateBasedListStructurePresenter {
             }
         });
         addClickedHandlerRegistration = display.getAddButton().addClickHandler(new ClickHandler() {
+            @Override
             public void onClick(ClickEvent event) {
                 if (event.isLeftButtonDown()) {
                     DynamicEntityDataSource ds = (DynamicEntityDataSource) display.getGrid().getDataSource();
