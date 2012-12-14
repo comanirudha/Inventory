@@ -15,7 +15,6 @@
  */
 package org.broadleafcommerce.inventory.service;
 
-
 import org.broadleafcommerce.common.persistence.EntityConfiguration;
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.inventory.service.type.InventoryType;

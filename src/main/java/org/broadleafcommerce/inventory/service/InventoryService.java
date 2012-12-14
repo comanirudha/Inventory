@@ -1,14 +1,3 @@
-package org.broadleafcommerce.inventory.service;
-
-import org.broadleafcommerce.core.catalog.domain.Sku;
-import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
-import org.broadleafcommerce.inventory.domain.Inventory;
-import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
-import org.broadleafcommerce.inventory.exception.InventoryUnavailableException;
-
-import java.util.List;
-import java.util.Map;
-
 /**
  * Copyright 2012 the original author or authors.
  * <p/>
@@ -24,6 +13,17 @@ import java.util.Map;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.broadleafcommerce.inventory.service;
+
+import org.broadleafcommerce.core.catalog.domain.Sku;
+import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
+import org.broadleafcommerce.inventory.domain.Inventory;
+import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
+import org.broadleafcommerce.inventory.exception.InventoryUnavailableException;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is a basic inventory service for Broadleaf Commerce.  This API defines a basic set of functions for checking 

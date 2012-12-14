@@ -22,7 +22,12 @@ import org.broadleafcommerce.inventory.domain.Inventory;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.*;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+
 import java.util.List;
 
 @Repository("blInventoryDao")

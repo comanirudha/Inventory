@@ -1,9 +1,3 @@
-package org.broadleafcommerce.inventory.service;
-
-import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
-
-import java.util.List;
-
 /**
  * Copyright 2012 the original author or authors.
  * <p/>
@@ -19,6 +13,13 @@ import java.util.List;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.broadleafcommerce.inventory.service;
+
+import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
+
+import java.util.List;
+
 public interface FulfillmentLocationService {
 
     /**

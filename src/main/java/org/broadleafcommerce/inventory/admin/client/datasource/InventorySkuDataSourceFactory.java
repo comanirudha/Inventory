@@ -15,8 +15,6 @@
  */
 package org.broadleafcommerce.inventory.admin.client.datasource;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.smartgwt.client.data.DataSource;
 import org.broadleafcommerce.admin.client.datasource.CeilingEntities;
 import org.broadleafcommerce.common.presentation.client.OperationType;
 import org.broadleafcommerce.openadmin.client.datasource.DataSourceFactory;
@@ -28,10 +26,14 @@ import org.broadleafcommerce.openadmin.client.dto.OperationTypes;
 import org.broadleafcommerce.openadmin.client.dto.PersistencePerspective;
 import org.broadleafcommerce.openadmin.client.service.AppServices;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.smartgwt.client.data.DataSource;
+
 public class InventorySkuDataSourceFactory implements DataSourceFactory {
 
     public static CustomCriteriaListGridDataSource dataSource = null;
 
+    @Override
     public void createDataSource(String name, OperationTypes operationTypes, Object[] additionalItems, AsyncCallback<DataSource> cb) {
 
         if (dataSource == null) {

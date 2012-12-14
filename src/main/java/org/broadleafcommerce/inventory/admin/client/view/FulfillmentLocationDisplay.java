@@ -1,8 +1,3 @@
-package org.broadleafcommerce.inventory.admin.client.view;
-
-import org.broadleafcommerce.openadmin.client.view.dynamic.DynamicEditDisplay;
-import org.broadleafcommerce.openadmin.client.view.dynamic.grid.GridStructureView;
-
 /**
  * Copyright 2012 the original author or authors.
  * <p/>
@@ -18,6 +13,12 @@ import org.broadleafcommerce.openadmin.client.view.dynamic.grid.GridStructureVie
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.broadleafcommerce.inventory.admin.client.view;
+
+import org.broadleafcommerce.openadmin.client.view.dynamic.DynamicEditDisplay;
+import org.broadleafcommerce.openadmin.client.view.dynamic.grid.GridStructureView;
+
 public interface FulfillmentLocationDisplay extends DynamicEditDisplay {
 
     public GridStructureView getInventoryDisplay();

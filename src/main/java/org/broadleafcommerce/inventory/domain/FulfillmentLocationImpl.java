@@ -1,5 +1,3 @@
-package org.broadleafcommerce.inventory.domain;
-
 /**
  * Copyright 2012 the original author or authors.
  *
@@ -16,6 +14,8 @@ package org.broadleafcommerce.inventory.domain;
  * limitations under the License.
  */
 
+package org.broadleafcommerce.inventory.domain;
+
 import org.broadleafcommerce.common.presentation.AdminPresentation;
 import org.broadleafcommerce.common.presentation.AdminPresentationClass;
 import org.broadleafcommerce.common.presentation.PopulateToOneFieldsEnum;
@@ -25,7 +25,18 @@ import org.broadleafcommerce.profile.core.domain.Address;
 import org.broadleafcommerce.profile.core.domain.AddressImpl;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
 @Entity
 @Table(name = "BLC_FULFILLMENT_LOCATION")
@@ -64,42 +75,52 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     @AdminPresentation(friendlyName = "FulfillmentLocationImpl_defaultLocation", prominent = true, group = "FulfillmentLocationImpl_generalGroupName", groupOrder = 1)
     protected Boolean defaultLocation = Boolean.FALSE;
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
 
+    @Override
     public Address getAddress() {
         return address;
     }
 
+    @Override
     public void setAddress(Address address) {
         this.address = address;
     }
 
+    @Override
     public Boolean getPickupLocation() {
         return pickupLocation;
     }
 
+    @Override
     public void setPickupLocation(Boolean pickupLocation) {
         this.pickupLocation = pickupLocation;
     }
 
+    @Override
     public Boolean getShippingLocation() {
         return shippingLocation;
     }
 
+    @Override
     public void setShippingLocation(Boolean shippingLocation) {
         this.shippingLocation = shippingLocation;
     }
 
+    @Override
     public Boolean getDefaultLocation() {
         return defaultLocation;
     }
 
+    @Override
     public void setDefaultLocation(Boolean defaultLocation) {
         this.defaultLocation = defaultLocation;
     }

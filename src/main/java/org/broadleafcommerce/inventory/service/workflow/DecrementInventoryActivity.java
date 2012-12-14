@@ -27,6 +27,7 @@ import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModification
 import org.broadleafcommerce.inventory.service.InventoryService;
 
 import javax.annotation.Resource;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ public class DecrementInventoryActivity extends BaseActivity {
 
     protected Integer maxRetries = 5;
 
+    @Override
     public ProcessContext execute(ProcessContext context) throws Exception {
 
         CheckoutSeed seed = ((CheckoutContext) context).getSeedData();
