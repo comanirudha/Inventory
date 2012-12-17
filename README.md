@@ -4,13 +4,16 @@ Inventory
 This module provides basic inventory functions to Broadleaf.  Some of the concepts provided here include:
 * Inventory across multiple Fulfillment Locations - relevant for multi-warehouse scenarios. You can track inventory
 for a Sku across many locations
-* Optimistic locking - while decrementing inventory, the system attempts to obtain an optimistic row lock
+* Optimistic locking - while changing inventory, the system attempts to obtain an optimistic row lock on the
+Inventory object for that particular Sku. This is useful for high-volume website where you want to ensure 
+* Workflow activities - New activities are included for the update, add and checkout workflows. The only time the
+inventory is actually adjusted in the database is during checkout.
 
 If you are including this module at the beginning of your
 project, simply switch to the `inventory` branch of DemoSite.  All of the necessary changes are implemented there.
 
 If you already have a site up and running from a vanilla version of DemoSite and would like to include inventory, here's
-how to get it integrated:
+how to get it integrated ([most recent diff version of these instructions](https://github.com/broadleafcommerce/demosite/compare/develop...inventory)):
 
 Get your Maven dependencies situated
 ------------------------------------
@@ -70,10 +73,42 @@ INSERT INTO BLC_ADMIN_SECTION_PERMISSION_XREF (ADMIN_SECTION_ID, ADMIN_PERMISSIO
 INSERT INTO BLC_ADMIN_SECTION_PERMISSION_XREF (ADMIN_SECTION_ID, ADMIN_PERMISSION_ID) VALUES (15,77);
 ```
 
-Include the CheckAvailabilityInventoryActivity in the BLC merge process
-in web.xml under the `patchConfigLocations` parameter, include this:
+Ensure the correct workflow activities are included and Hibernate knows about the new entities:
+---------------------------------------------------
+Modify the web.xml in both the `site` and `admin` projects (and `combined` if you're using it) and ensure that this
+applicationContext appears in the `patchConfigLocations` parameter:
 ```
 classpath:/bl-inventory-applicationContext.xml
 ```
 
-Include
+If you have made modifications any modifications to the update/add/checkout workflows, you will need to ensure that
+`blUpdateItemWorkflow` and `blAddItemWorkflow` include the `CheckAvailabilityActivity`:
+```xml
+...
+<bean id="blAddItemWorkflow" class="org.broadleafcommerce.core.workflow.SequenceProcessor">
+    ...
+    <property name="activities">
+        <list>
+            <bean class="org.broadleafcommerce.core.order.service.workflow.add.ValidateAddRequestActivity"/>
+            <bean class="org.broadleafcommerce.inventory.service.workflow.CheckAvailabilityActivity"/>
+        ...
+```
+and the `blCheckoutWorkflow` includes the `DecrementInventoryActivity` and also uses the `blInventoryCompensatingCheckoutErrorHandler`:
+```xml
+<bean id="blCheckoutWorkflow" class="org.broadleafcommerce.core.workflow.SequenceProcessor">
+    <property name="activities">
+        <list>
+            <bean class="org.broadleafcommerce.core.offer.service.workflow.VerifyCustomerMaxOfferUsesActivity"/>
+            <bean class="org.broadleafcommerce.inventory.service.workflow.DecrementInventoryActivity"/>
+        ...
+    <property name="defaultErrorHandler" ref="blInventoryCompensatingCheckoutErrorHandler"/>
+```
+
+Include the admin GWT module to manage inventory
+In myCompanyAdmin.gwt.xml:
+```xml
+<inherits name="org.broadleafcommerce.inventory.admin.inventoryModule" />
+```
+
+And that's it!  Other potential modifications might be to show a specific message when you try to add an item that
+doesn't have inventory.  [Check the diff](https://github.com/broadleafcommerce/demosite/compare/develop...inventory) to see what we did on DemoSite.
