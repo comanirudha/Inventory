@@ -82,7 +82,7 @@
 				</plugin>
 				<plugin>
 					<groupId>org.zeroturnaround</groupId>
-					<artifactId>javarebel-maven-plugin</artifactId>
+					<artifactId>jrebel-maven-plugin</artifactId>
 					<version>1.0.5</version>
 				</plugin>
 				<!--This plugin's configuration is used to store Eclipse m2e settings 
@@ -100,7 +100,7 @@
 											org.zeroturnaround
 										</groupId>
 										<artifactId>
-											javarebel-maven-plugin
+											jrebel-maven-plugin
 										</artifactId>
 										<versionRange>
 											[1.0.5,)
@@ -179,7 +179,7 @@
 				<plugins>
 					<plugin>
 						<groupId>org.zeroturnaround</groupId>
-						<artifactId>javarebel-maven-plugin</artifactId>
+						<artifactId>jrebel-maven-plugin</artifactId>
 						<executions>
 							<execution>
 								<id>generate-rebel-xml</id>
