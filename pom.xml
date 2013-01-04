@@ -200,6 +200,7 @@
             <version>${blc.version}</version>
             <scope>compile</scope>
             <type>jar</type>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
@@ -207,6 +208,7 @@
             <version>${blc.version}</version>
             <scope>compile</scope>
             <type>jar</type>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
@@ -214,6 +216,7 @@
             <version>${blc.version}</version>
             <scope>compile</scope>
             <type>jar</type>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
