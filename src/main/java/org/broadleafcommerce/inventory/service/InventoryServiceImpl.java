@@ -58,12 +58,12 @@ public class InventoryServiceImpl implements InventoryService {
         }
 
         if (sku.getInventoryType() == null
-        		&& (sku.getProduct().getDefaultCategory() == null
-        		|| sku.getProduct().getDefaultCategory().getInventoryType() == null)) {
+                && (sku.getProduct().getDefaultCategory() == null
+                || sku.getProduct().getDefaultCategory().getInventoryType() == null)) {
             return true;
         } else if (InventoryType.NONE.equals(sku.getInventoryType())
-        		|| (sku.getProduct().getDefaultCategory() != null
-        		&& InventoryType.NONE.equals(sku.getProduct().getDefaultCategory().getInventoryType()))){
+                || (sku.getProduct().getDefaultCategory() != null
+                && InventoryType.NONE.equals(sku.getProduct().getDefaultCategory().getInventoryType()))){
             return true;
         }
 
@@ -211,12 +211,12 @@ public class InventoryServiceImpl implements InventoryService {
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
             if (sku.getInventoryType() == null 
-            		&& (sku.getDefaultProduct().getDefaultCategory() == null
-            		|| sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
+                    && (sku.getDefaultProduct().getDefaultCategory() == null
+                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
                 continue;
             } else if (InventoryType.NONE.equals(sku.getInventoryType()) 
-            		|| (sku.getDefaultProduct().getDefaultCategory() != null 
-            		&& InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))){
+                    || (sku.getDefaultProduct().getDefaultCategory() != null 
+                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))){
                 continue;
             }
 
@@ -236,7 +236,7 @@ public class InventoryServiceImpl implements InventoryService {
                 inventoryDao.save(inventory);
             } else {
                 throw new IllegalStateException("There was a call to InventoryServiceImpl.incrementInventory for a default fulfillment location, but no default " +
-                		"inventory for the sku: " + sku.getId() + " could be found!");
+                        "inventory for the sku: " + sku.getId() + " could be found!");
             }
 
         }
