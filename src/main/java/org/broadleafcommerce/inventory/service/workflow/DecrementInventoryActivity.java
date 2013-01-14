@@ -23,16 +23,20 @@ import org.broadleafcommerce.core.order.domain.DiscreteOrderItem;
 import org.broadleafcommerce.core.order.domain.OrderItem;
 import org.broadleafcommerce.core.workflow.BaseActivity;
 import org.broadleafcommerce.core.workflow.ProcessContext;
+import org.broadleafcommerce.core.workflow.state.ActivityStateManagerImpl;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
 import org.broadleafcommerce.inventory.service.InventoryService;
-
-import javax.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 public class DecrementInventoryActivity extends BaseActivity {
+
+    public static final String ROLLBACK_BLC_INVENTORY_DECREMENTED = "ROLLBACK_BLC_INVENTORY_DECREMENTED";
+    public static final String ROLLBACK_BLC_ORDER_ID = "ROLLBACK_BLC_ORDER_ID";
 
     @Resource(name = "blInventoryService")
     private InventoryService inventoryService;
@@ -73,10 +77,6 @@ public class DecrementInventoryActivity extends BaseActivity {
         while (retryCount < maxRetries) {
             try {
                 inventoryService.decrementInventory(skuInventoryMap);
-                
-                //Stash this in the context for later, in case something fails, so that we can 
-                //create a compensating transaction for this inventory
-                seed.getUserDefinedFields().put("BLC_INVENTORY_DECREMENTED", skuInventoryMap);
                 break;
             } catch (ConcurrentInventoryModificationException ex) {
                 retryCount++;
@@ -85,6 +85,18 @@ public class DecrementInventoryActivity extends BaseActivity {
                     throw ex;
                 }
             }
+        }
+
+        if (getRollbackHandler() != null && getAutomaticallyRegisterRollbackHandler()) {
+            Map<String, Object> myState = new HashMap<String, Object>();
+            if (getStateConfiguration() != null && !getStateConfiguration().isEmpty()) {
+                myState.putAll(getStateConfiguration());
+            }
+
+            myState.put(ROLLBACK_BLC_INVENTORY_DECREMENTED, skuInventoryMap);
+            myState.put(ROLLBACK_BLC_ORDER_ID, seed.getOrder().getId());
+
+            ActivityStateManagerImpl.getStateManager().registerState(this, context, getRollbackHandler(), myState);
         }
 
         return context;

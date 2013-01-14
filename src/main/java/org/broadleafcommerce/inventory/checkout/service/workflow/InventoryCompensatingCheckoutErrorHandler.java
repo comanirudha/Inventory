@@ -29,9 +29,9 @@ import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModification
 import org.broadleafcommerce.inventory.service.InventoryService;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 /**
  * This error handler essentially does exactly what the {@link DefaultErrorHandler} does, 
@@ -39,8 +39,10 @@ import java.util.Map;
  * so, it attampts to compensate for that inventory.
  * 
  * @author Kelly Tisdell
+ * @deprecated Use InventoryRollbackHandler
  *
  */
+@Deprecated
 @Component("blInventoryCompensatingCheckoutErrorHandler")
 public class InventoryCompensatingCheckoutErrorHandler implements ErrorHandler {
 
