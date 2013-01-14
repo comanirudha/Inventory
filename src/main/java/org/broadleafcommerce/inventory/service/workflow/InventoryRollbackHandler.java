@@ -82,8 +82,8 @@ public class InventoryRollbackHandler implements RollbackHandler {
                                 "but were unsuccessful for order ID: " + orderId + ". This should be corrected manually!", ex);
                     }
                 } catch (InventoryUnavailableException e) {
-                    //This is an awkward state.  I just added some inventory, but something happened, and I want to remove it, but it's already gone!
-                    LOG.error("While trying roll back inventory, we found that there was none left take out.", e);
+                    //This is an awkward, unlikely state.  I just added some inventory, but something happened, and I want to remove it, but it's already gone!
+                    LOG.error("While trying roll back (decrement) inventory, we found that there was none left decrement.", e);
                 } catch (RuntimeException ex) {
                     LOG.error("An unexpected error occured in the error handler of the checkout workflow trying to compensate for inventory. This happend for order ID: " +
                             orderId + ". This should be corrected manually!", ex);
