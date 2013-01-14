@@ -1,4 +1,4 @@
-package org.broadleafcommerce.inventory.checkout.service.workflow;
+package org.broadleafcommerce.inventory.service.workflow;
 
 import org.broadleafcommerce.common.logging.SupportLogManager;
 import org.broadleafcommerce.common.logging.SupportLogger;
