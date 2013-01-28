@@ -44,7 +44,7 @@ public class InventoryRollbackHandler implements RollbackHandler {
 
         @SuppressWarnings("unchecked")
         Map<Sku, Integer> inventoryToIncrement = (Map<Sku, Integer>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED");
-        if (!inventoryToIncrement.isEmpty()) {
+        if (inventoryToIncrement != null && !inventoryToIncrement.isEmpty()) {
             int retryCount = 0;
 
             while (retryCount <= maxRetries) {
@@ -66,14 +66,13 @@ public class InventoryRollbackHandler implements RollbackHandler {
         }
 
         @SuppressWarnings("unchecked")
-        Map<Sku, Integer> map = (Map<Sku, Integer>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED");
-        Map<Sku, Integer> inventoryToDecrement = map;
-        if (!inventoryToDecrement.isEmpty()) {
+        Map<Sku, Integer> inventoryToDecrement = (Map<Sku, Integer>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED");
+        if (inventoryToDecrement != null && !inventoryToDecrement.isEmpty()) {
             int retryCount = 0;
 
             while (retryCount <= maxRetries) {
                 try {
-                    inventoryService.decrementInventory(inventoryToIncrement);
+                    inventoryService.decrementInventory(inventoryToDecrement);
                     break;
                 } catch (ConcurrentInventoryModificationException ex) {
                     retryCount++;
