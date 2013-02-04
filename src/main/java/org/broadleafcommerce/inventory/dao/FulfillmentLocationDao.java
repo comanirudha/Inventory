@@ -52,4 +52,15 @@ public interface FulfillmentLocationDao {
      */
     public void updateOtherDefaultLocationToFalse(FulfillmentLocation fulfillmentLocation);
 
+    /**
+     * Reads the first fulfillment location that it finds that is flagged as default
+     */
+    public FulfillmentLocation readDefaultFulfillmentLocation();
+
+    /**
+     * Reads all fulfillment locations associated with a sku
+     * @param skuId
+     * @return
+     */
+    public List<FulfillmentLocation> readAllFulfillmentLocationsForSku(Long skuId);
 }

@@ -17,5 +17,21 @@
             FROM org.broadleafcommerce.inventory.domain.FulfillmentLocation fulfillmentLocation
         </query>
     </named-query>
+    
+    <named-query name="BC_READ_DEFAULT_FULFILLEMNT_LOCATION">
+        <query>
+            SELECT fulfillmentLocation
+            FROM org.broadleafcommerce.inventory.domain.FulfillmentLocation fulfillmentLocation 
+            WHERE fulfillmentLocation.defaultLocation = true
+        </query>
+    </named-query>
+    
+    <named-query name="BC_READ_FULFILLMENT_LOCATIONS_FOR_SKU">
+        <query>
+            SELECT inventory.fulfillmentLocation
+            FROM org.broadleafcommerce.inventory.domain.Inventory inventory
+            WHERE inventory.sku.id = :skuId
+        </query>
+    </named-query>
 
 </entity-mappings>

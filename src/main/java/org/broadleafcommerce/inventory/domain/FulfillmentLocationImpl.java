@@ -34,7 +34,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -59,7 +59,7 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     @Column(name = "FULFILLMENT_LOCATION_ID")
     protected Long id;
 
-    @OneToOne(cascade = CascadeType.ALL, targetEntity = AddressImpl.class, optional = false)
+    @ManyToOne(cascade = CascadeType.ALL, targetEntity = AddressImpl.class, optional = false)
     @JoinColumn(name = "ADDRESS_ID")
     protected Address address;
 

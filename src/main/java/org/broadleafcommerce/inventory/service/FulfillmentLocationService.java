@@ -53,4 +53,16 @@ public interface FulfillmentLocationService {
      */
     public void updateOtherDefaultLocationToFalse(FulfillmentLocation fulfillmentLocation);
 
+    /**
+     * Returns the first default fulfillment location found. There should only be one default.
+     * @return
+     */
+    public FulfillmentLocation findDefaultFulfillmentLocation();
+
+    /**
+     * Returns all fulfillment locations associated with a sku
+     * @param skuId
+     * @return
+     */
+    public List<FulfillmentLocation> findAllFulfillmentLocationsForSku(Long skuId);
 }
