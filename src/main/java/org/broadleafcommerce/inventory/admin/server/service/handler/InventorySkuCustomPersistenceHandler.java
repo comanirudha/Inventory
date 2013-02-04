@@ -47,17 +47,15 @@ import org.broadleafcommerce.openadmin.server.service.persistence.module.RecordH
 
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
 
-import javax.annotation.Resource;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 public class InventorySkuCustomPersistenceHandler extends CustomPersistenceHandlerAdapter {
 
     private static final Log LOG = LogFactory.getLog(InventorySkuCustomPersistenceHandler.class);
-
-    private static final Integer MAX_RETRIES = 5;
 
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
@@ -134,6 +132,7 @@ public class InventorySkuCustomPersistenceHandler extends CustomPersistenceHandl
 
             Long fulfillmentLocationId = Long.parseLong(persistencePackage.getCustomCriteria()[1]);
             FulfillmentLocation fulfillmentLocation = (FulfillmentLocation) dynamicEntityDao.retrieve(FulfillmentLocationImpl.class, fulfillmentLocationId);
+            //TODO: Fix this!!!! This needs to be paginated or something.  This is a potential OutOfMemoryError!
             List<Sku> skus = inventoryService.readSkusNotAtFulfillmentLocation(fulfillmentLocation);
 
             // if any sku in this list does not have InventoryType.BASIC or if its parent category does not have
