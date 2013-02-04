@@ -20,9 +20,9 @@ import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-
 import java.util.List;
+
+import javax.annotation.Resource;
 
 @Service("blFulfillmentLocationService")
 @Transactional(value="blTransactionManager")
@@ -59,5 +59,17 @@ public class FulfillmentLocationServiceImpl implements FulfillmentLocationServic
     @Transactional("blTransactionManager")
     public void updateOtherDefaultLocationToFalse(FulfillmentLocation fulfillmentLocation) {
         fulfillmentLocationDao.updateOtherDefaultLocationToFalse(fulfillmentLocation);
+    }
+
+    @Override
+    @Transactional("blTransactionManager")
+    public FulfillmentLocation findDefaultFulfillmentLocation() {
+        return fulfillmentLocationDao.readDefaultFulfillmentLocation();
+    }
+
+    @Override
+    @Transactional("blTransactionManager")
+    public List<FulfillmentLocation> findAllFulfillmentLocationsForSku(Long skuId) {
+        return fulfillmentLocationDao.readAllFulfillmentLocationsForSku(skuId);
     }
 }

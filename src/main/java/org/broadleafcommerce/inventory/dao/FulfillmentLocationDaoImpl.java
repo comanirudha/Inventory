@@ -16,13 +16,14 @@
 package org.broadleafcommerce.inventory.dao;
 
 import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
+import org.hibernate.ejb.QueryHints;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
-import java.util.List;
 
 @Repository("blFulfillmentLocationDao")
 public class FulfillmentLocationDaoImpl implements FulfillmentLocationDao {
@@ -33,7 +34,9 @@ public class FulfillmentLocationDaoImpl implements FulfillmentLocationDao {
     @SuppressWarnings("unchecked")
     @Override
     public List<FulfillmentLocation> readAll() {
-        return em.createNamedQuery("BC_READ_ALL_FULFILLMENT_LOCATIONS").getResultList();
+        Query query = em.createNamedQuery("BC_READ_ALL_FULFILLMENT_LOCATIONS");
+        query.setHint(QueryHints.HINT_CACHEABLE, true);
+        return query.getResultList();
     }
 
     @Override
@@ -57,4 +60,27 @@ public class FulfillmentLocationDaoImpl implements FulfillmentLocationDao {
         query.setParameter("fulfillmentLocationId", fulfillmentLocation.getId());
         query.executeUpdate();
     }
+
+    @Override
+    public FulfillmentLocation readDefaultFulfillmentLocation() {
+        Query query = em.createNamedQuery("BC_READ_DEFAULT_FULFILLEMNT_LOCATION");
+        query.setMaxResults(1);
+        query.setHint(QueryHints.HINT_CACHEABLE, true);
+        @SuppressWarnings("rawtypes")
+        List results = query.getResultList();
+        if (results != null && !results.isEmpty()) {
+            return (FulfillmentLocation) results.get(0);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<FulfillmentLocation> readAllFulfillmentLocationsForSku(Long skuId) {
+        Query query = em.createNamedQuery("BC_READ_FULFILLMENT_LOCATIONS_FOR_SKU");
+        query.setHint(QueryHints.HINT_CACHEABLE, true);
+        query.setParameter("skuId", skuId);
+        return query.getResultList();
+    }
+
 }
