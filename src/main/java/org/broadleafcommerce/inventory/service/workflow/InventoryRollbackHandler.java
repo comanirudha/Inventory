@@ -33,7 +33,9 @@ public class InventoryRollbackHandler implements RollbackHandler {
     @Override
     public void rollbackState(Activity activity, ProcessContext processContext, Map<String, Object> stateConfiguration) throws RollbackFailureException {
 
-        if (stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED") == null && stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED") == null) {
+        if (stateConfiguration == null ||
+                (stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED") == null &&
+                stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED") == null)) {
             return;
         }
 

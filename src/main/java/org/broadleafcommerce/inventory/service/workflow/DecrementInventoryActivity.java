@@ -43,6 +43,11 @@ public class DecrementInventoryActivity extends BaseActivity {
 
     protected Integer maxRetries = 5;
 
+    public DecrementInventoryActivity() {
+        super();
+        super.setAutomaticallyRegisterRollbackHandler(false);
+    }
+
     @Override
     public ProcessContext execute(ProcessContext context) throws Exception {
 
@@ -87,7 +92,7 @@ public class DecrementInventoryActivity extends BaseActivity {
             }
         }
 
-        if (getRollbackHandler() != null && getAutomaticallyRegisterRollbackHandler()) {
+        if (getRollbackHandler() != null && !getAutomaticallyRegisterRollbackHandler()) {
             Map<String, Object> myState = new HashMap<String, Object>();
             if (getStateConfiguration() != null && !getStateConfiguration().isEmpty()) {
                 myState.putAll(getStateConfiguration());
@@ -95,8 +100,7 @@ public class DecrementInventoryActivity extends BaseActivity {
 
             myState.put(ROLLBACK_BLC_INVENTORY_DECREMENTED, skuInventoryMap);
             myState.put(ROLLBACK_BLC_ORDER_ID, seed.getOrder().getId());
-
-            ActivityStateManagerImpl.getStateManager().registerState(this, context, getRollbackHandler(), myState);
+            ActivityStateManagerImpl.getStateManager().registerState(this, context, getRollbackRegion(), getRollbackHandler(), myState);
         }
 
         return context;
