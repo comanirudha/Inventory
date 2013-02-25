@@ -18,7 +18,7 @@
         </query>
     </named-query>
     
-    <named-query name="BC_READ_DEFAULT_FULFILLEMNT_LOCATION">
+    <named-query name="BC_READ_DEFAULT_FULFILLMENT_LOCATION">
         <query>
             SELECT fulfillmentLocation
             FROM org.broadleafcommerce.inventory.domain.FulfillmentLocation fulfillmentLocation 
