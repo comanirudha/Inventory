@@ -63,7 +63,7 @@ public class FulfillmentLocationDaoImpl implements FulfillmentLocationDao {
 
     @Override
     public FulfillmentLocation readDefaultFulfillmentLocation() {
-        Query query = em.createNamedQuery("BC_READ_DEFAULT_FULFILLEMNT_LOCATION");
+        Query query = em.createNamedQuery("BC_READ_DEFAULT_FULFILLMENT_LOCATION");
         query.setMaxResults(1);
         query.setHint(QueryHints.HINT_CACHEABLE, true);
         @SuppressWarnings("rawtypes")
