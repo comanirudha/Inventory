@@ -35,7 +35,7 @@ import java.util.Map;
 public class DecrementInventoryActivity extends BaseActivity {
 
     @Resource(name = "blInventoryService")
-    private InventoryService inventoryService;
+    protected InventoryService inventoryService;
 
     protected Integer maxRetries = 5;
 
