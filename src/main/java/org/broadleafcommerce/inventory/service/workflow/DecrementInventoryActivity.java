@@ -39,7 +39,7 @@ public class DecrementInventoryActivity extends BaseActivity {
     public static final String ROLLBACK_BLC_ORDER_ID = "ROLLBACK_BLC_ORDER_ID";
 
     @Resource(name = "blInventoryService")
-    private InventoryService inventoryService;
+    protected InventoryService inventoryService;
 
     protected Integer maxRetries = 5;
 
