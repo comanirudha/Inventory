@@ -45,9 +45,6 @@ import javax.annotation.Resource;
  */
 public class DecrementInventoryActivity extends BaseActivity {
 
-    public static final String ROLLBACK_BLC_INVENTORY_DECREMENTED = "ROLLBACK_BLC_INVENTORY_DECREMENTED";
-    public static final String ROLLBACK_BLC_ORDER_ID = "ROLLBACK_BLC_ORDER_ID";
-
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
 
@@ -120,8 +117,8 @@ public class DecrementInventoryActivity extends BaseActivity {
             state.setSkuQuantityMap(skuInventoryMap);
             states.put(location, state);
             
-            myState.put(ROLLBACK_BLC_INVENTORY_DECREMENTED, states);
-            myState.put(ROLLBACK_BLC_ORDER_ID, seed.getOrder().getId());
+            myState.put(InventoryRollbackHandler.ROLLBACK_BLC_INVENTORY_DECREMENTED, states);
+            myState.put(InventoryRollbackHandler.ROLLBACK_BLC_ORDER_ID, seed.getOrder().getId());
             ActivityStateManagerImpl.getStateManager().registerState(this, context, getRollbackRegion(), getRollbackHandler(), myState);
         }
 

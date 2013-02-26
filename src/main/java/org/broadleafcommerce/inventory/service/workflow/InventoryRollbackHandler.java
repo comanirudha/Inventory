@@ -26,6 +26,10 @@ public class InventoryRollbackHandler implements RollbackHandler {
 
     private static final SupportLogger LOG = SupportLogManager.getLogger("broadleaf-oms", InventoryRollbackHandler.class);
     
+    public static final String ROLLBACK_BLC_INVENTORY_DECREMENTED = "ROLLBACK_BLC_INVENTORY_DECREMENTED";
+    public static final String ROLLBACK_BLC_INVENTORY_INCREMENTED = "ROLLBACK_BLC_INVENTORY_INCREMENTED";
+    public static final String ROLLBACK_BLC_ORDER_ID = "ROLLBACK_BLC_ORDER_ID";
+
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
 
@@ -35,18 +39,18 @@ public class InventoryRollbackHandler implements RollbackHandler {
     public void rollbackState(Activity activity, ProcessContext processContext, Map<String, Object> stateConfiguration) throws RollbackFailureException {
 
         if (stateConfiguration == null ||
-                (stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED") == null &&
-                stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED") == null)) {
+                (stateConfiguration.get(ROLLBACK_BLC_INVENTORY_DECREMENTED) == null &&
+                stateConfiguration.get(ROLLBACK_BLC_INVENTORY_INCREMENTED) == null)) {
             return;
         }
 
         String orderId = "(Not Known)";
-        if (stateConfiguration.get("ROLLBACK_BLC_ORDER_ID") != null) {
-            orderId = String.valueOf(stateConfiguration.get("ROLLBACK_BLC_ORDER_ID"));
+        if (stateConfiguration.get(ROLLBACK_BLC_ORDER_ID) != null) {
+            orderId = String.valueOf(stateConfiguration.get(ROLLBACK_BLC_ORDER_ID));
         }
 
         @SuppressWarnings("unchecked")
-        Map<FulfillmentLocation, InventoryState> inventoryToIncrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED");
+        Map<FulfillmentLocation, InventoryState> inventoryToIncrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get(ROLLBACK_BLC_INVENTORY_DECREMENTED);
         if (inventoryToIncrement != null && !inventoryToIncrement.isEmpty()) {
 
             Set<FulfillmentLocation> keys = inventoryToIncrement.keySet();
@@ -74,7 +78,7 @@ public class InventoryRollbackHandler implements RollbackHandler {
         }
 
         @SuppressWarnings("unchecked")
-        Map<FulfillmentLocation, InventoryState> inventoryToDecrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED");
+        Map<FulfillmentLocation, InventoryState> inventoryToDecrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get(ROLLBACK_BLC_INVENTORY_INCREMENTED);
         if (inventoryToDecrement != null && !inventoryToDecrement.isEmpty()) {
 
             Set<FulfillmentLocation> keys = inventoryToIncrement.keySet();
