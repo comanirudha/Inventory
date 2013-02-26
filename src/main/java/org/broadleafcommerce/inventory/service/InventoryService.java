@@ -71,6 +71,25 @@ public interface InventoryService {
     public void decrementInventory(Map<Sku, Integer> skuInventory, FulfillmentLocation fulfillmentLocation) throws ConcurrentInventoryModificationException, InventoryUnavailableException;
 
     /**
+     * Subtracts the quantity from inventory on hand in the default fulfillment location for each sku in the map. Specified quantity must be a positive integer. This 
+     * is typically done when the items are shipped or fulfilled.
+     * @param skuInventory
+     * @throws ConcurrentInventoryModificationException
+     * @throws InventoryUnavailableException
+     */
+    public void decrementInventoryOnHand(Map<Sku, Integer> skuInventory) throws ConcurrentInventoryModificationException, InventoryUnavailableException;
+
+    /**
+     * Subtracts the quantity from inventory on hand for each sku in the map for the given fulfillment location. Specified quantity must be a positive integer. 
+     * This is typically done when inventory is shipped or fulfilled.
+     * @param skuInventory
+     * @param fulfillmentLocation
+     * @throws ConcurrentInventoryModificationException
+     * @throws InventoryUnavailableException
+     */
+    public void decrementInventoryOnHand(Map<Sku, Integer> skuInventory, FulfillmentLocation fulfillmentLocation) throws ConcurrentInventoryModificationException, InventoryUnavailableException;
+
+    /**
      * Add available inventory to sku. If fulfillment location is null, this method throws an {@link IllegalArgumentException}.
      * @param skuInventory
      * @param fulfillmentLocation
@@ -79,13 +98,28 @@ public interface InventoryService {
     public void incrementInventory(Map<Sku, Integer> skuInventory, FulfillmentLocation fulfillmentLocation) throws ConcurrentInventoryModificationException;
     
     /**
-     * Attempts to add inventory to an inventory record associated with a default fulfillment location.
+     * Attempts to add available inventory to an inventory record associated with a default fulfillment location.
      * 
      * @param skuInventory
      * @throws ConcurrentInventoryModificationException
      * @throws IllegalStateException if no default fulfillment location could be found for the Sku.
      */
     public void incrementInventory(Map<Sku, Integer> skuInventory) throws ConcurrentInventoryModificationException;
+
+    /**
+     * Add inventory on hand to sku. If fulfillment location is null, this method throws an {@link IllegalArgumentException}.
+     * @param skuInventory
+     * @param fulfillmentLocation
+     * @throws ConcurrentInventoryModificationException
+     */
+    public void incrementInventoryOnHand(Map<Sku, Integer> skuInventory, FulfillmentLocation fulfillmentLocation) throws ConcurrentInventoryModificationException;
+
+    /**
+     * Attempts to add inventory on hand to an inventory record associated with a default fulfillment location.
+     * @param skuInventory
+     * @throws ConcurrentInventoryModificationException
+     */
+    public void incrementInventoryOnHand(Map<Sku, Integer> skuInventory) throws ConcurrentInventoryModificationException;
 
     /**
      * Retrieves the {@link Inventory} for the given {@link Sku} and {@link FulfillmentLocation}
