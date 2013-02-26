@@ -2,16 +2,17 @@ package org.broadleafcommerce.inventory.service.workflow;
 
 import org.broadleafcommerce.common.logging.SupportLogManager;
 import org.broadleafcommerce.common.logging.SupportLogger;
-import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.workflow.Activity;
 import org.broadleafcommerce.core.workflow.ProcessContext;
 import org.broadleafcommerce.core.workflow.state.RollbackFailureException;
 import org.broadleafcommerce.core.workflow.state.RollbackHandler;
+import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
 import org.broadleafcommerce.inventory.exception.InventoryUnavailableException;
 import org.broadleafcommerce.inventory.service.InventoryService;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -45,50 +46,60 @@ public class InventoryRollbackHandler implements RollbackHandler {
         }
 
         @SuppressWarnings("unchecked")
-        Map<Sku, Integer> inventoryToIncrement = (Map<Sku, Integer>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED");
+        Map<FulfillmentLocation, InventoryState> inventoryToIncrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_DECREMENTED");
         if (inventoryToIncrement != null && !inventoryToIncrement.isEmpty()) {
-            int retryCount = 0;
 
-            while (retryCount <= maxRetries) {
-                try {
-                    inventoryService.incrementInventory(inventoryToIncrement);
-                    break;
-                } catch (ConcurrentInventoryModificationException ex) {
-                    retryCount++;
-                    if (retryCount == maxRetries) {
-                        LOG.error("After an exception was encountered during checkout, where inventory was decremented. " + maxRetries + " attempts were made to compensate, " +
-                                "but were unsuccessful for order ID: " + orderId + ". This should be corrected manually!", ex);
+            Set<FulfillmentLocation> keys = inventoryToIncrement.keySet();
+
+            for (FulfillmentLocation location : keys) {
+                int retryCount = 0;
+
+                while (retryCount <= maxRetries) {
+                    try {
+                        inventoryService.incrementInventory(inventoryToIncrement.get(location).getSkuQuantityMap(), location);
+                        break;
+                    } catch (ConcurrentInventoryModificationException ex) {
+                        retryCount++;
+                        if (retryCount == maxRetries) {
+                            LOG.error("After an exception was encountered during checkout, where inventory was decremented. " + maxRetries + " attempts were made to compensate, " +
+                                    "but were unsuccessful for order ID: " + orderId + ". This should be corrected manually!", ex);
+                        }
+                    } catch (RuntimeException ex) {
+                        LOG.error("An unexpected error occured in the error handler of the checkout workflow trying to compensate for inventory. This happend for order ID: " +
+                                orderId + ". This should be corrected manually!", ex);
+                        break;
                     }
-                } catch (RuntimeException ex) {
-                    LOG.error("An unexpected error occured in the error handler of the checkout workflow trying to compensate for inventory. This happend for order ID: " +
-                            orderId + ". This should be corrected manually!", ex);
-                    break;
                 }
             }
         }
 
         @SuppressWarnings("unchecked")
-        Map<Sku, Integer> inventoryToDecrement = (Map<Sku, Integer>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED");
+        Map<FulfillmentLocation, InventoryState> inventoryToDecrement = (Map<FulfillmentLocation, InventoryState>) stateConfiguration.get("ROLLBACK_BLC_INVENTORY_INCREMENTED");
         if (inventoryToDecrement != null && !inventoryToDecrement.isEmpty()) {
-            int retryCount = 0;
 
-            while (retryCount <= maxRetries) {
-                try {
-                    inventoryService.decrementInventory(inventoryToDecrement);
-                    break;
-                } catch (ConcurrentInventoryModificationException ex) {
-                    retryCount++;
-                    if (retryCount == maxRetries) {
-                        LOG.error("After an exception was encountered during checkout, where inventory was incremented. " + maxRetries + " attempts were made to compensate, " +
-                                "but were unsuccessful for order ID: " + orderId + ". This should be corrected manually!", ex);
+            Set<FulfillmentLocation> keys = inventoryToIncrement.keySet();
+
+            for (FulfillmentLocation location : keys) {
+                int retryCount = 0;
+
+                while (retryCount <= maxRetries) {
+                    try {
+                        inventoryService.decrementInventory(inventoryToDecrement.get(location).getSkuQuantityMap(), location);
+                        break;
+                    } catch (ConcurrentInventoryModificationException ex) {
+                        retryCount++;
+                        if (retryCount == maxRetries) {
+                            LOG.error("After an exception was encountered during checkout, where inventory was incremented. " + maxRetries + " attempts were made to compensate, " +
+                                    "but were unsuccessful for order ID: " + orderId + ". This should be corrected manually!", ex);
+                        }
+                    } catch (InventoryUnavailableException e) {
+                        //This is an awkward, unlikely state.  I just added some inventory, but something happened, and I want to remove it, but it's already gone!
+                        LOG.error("While trying roll back (decrement) inventory, we found that there was none left decrement.", e);
+                    } catch (RuntimeException ex) {
+                        LOG.error("An unexpected error occured in the error handler of the checkout workflow trying to compensate for inventory. This happend for order ID: " +
+                                orderId + ". This should be corrected manually!", ex);
+                        break;
                     }
-                } catch (InventoryUnavailableException e) {
-                    //This is an awkward, unlikely state.  I just added some inventory, but something happened, and I want to remove it, but it's already gone!
-                    LOG.error("While trying roll back (decrement) inventory, we found that there was none left decrement.", e);
-                } catch (RuntimeException ex) {
-                    LOG.error("An unexpected error occured in the error handler of the checkout workflow trying to compensate for inventory. This happend for order ID: " +
-                            orderId + ". This should be corrected manually!", ex);
-                    break;
                 }
             }
         }

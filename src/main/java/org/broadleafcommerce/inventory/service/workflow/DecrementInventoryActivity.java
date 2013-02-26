@@ -24,7 +24,9 @@ import org.broadleafcommerce.core.order.domain.OrderItem;
 import org.broadleafcommerce.core.workflow.BaseActivity;
 import org.broadleafcommerce.core.workflow.ProcessContext;
 import org.broadleafcommerce.core.workflow.state.ActivityStateManagerImpl;
+import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
+import org.broadleafcommerce.inventory.service.FulfillmentLocationService;
 import org.broadleafcommerce.inventory.service.InventoryService;
 
 import java.util.HashMap;
@@ -33,6 +35,14 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+/**
+ * Default workflow activity to decrement inventory. This only attempts to decrement inventory from 
+ * the default fulfillment location.  If you have specific requirements for additional fulfillment locations, 
+ * please implement this in a way that works for you.
+ * 
+ * @author Kelly Tisdell
+ *
+ */
 public class DecrementInventoryActivity extends BaseActivity {
 
     public static final String ROLLBACK_BLC_INVENTORY_DECREMENTED = "ROLLBACK_BLC_INVENTORY_DECREMENTED";
@@ -40,6 +50,9 @@ public class DecrementInventoryActivity extends BaseActivity {
 
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
+
+    @Resource(name = "blFulfillmentLocationService")
+    protected FulfillmentLocationService fulfillmentLocationService;
 
     protected Integer maxRetries = 5;
 
@@ -68,6 +81,7 @@ public class DecrementInventoryActivity extends BaseActivity {
             }
             skuInventoryMap.put(sku, orderItem.getQuantity());
         }
+
 
         // There is a retry policy set in case of concurrent update exceptions where several
         // requests would try to update the inventory at the same time. The call to decrement inventory, 
@@ -98,7 +112,15 @@ public class DecrementInventoryActivity extends BaseActivity {
                 myState.putAll(getStateConfiguration());
             }
 
-            myState.put(ROLLBACK_BLC_INVENTORY_DECREMENTED, skuInventoryMap);
+            FulfillmentLocation location = fulfillmentLocationService.findDefaultFulfillmentLocation();
+            
+            HashMap<FulfillmentLocation, InventoryState> states = new HashMap<FulfillmentLocation, InventoryState>();
+            InventoryState state = new InventoryState();
+            state.setFulfillmentLocation(location);
+            state.setSkuQuantityMap(skuInventoryMap);
+            states.put(location, state);
+            
+            myState.put(ROLLBACK_BLC_INVENTORY_DECREMENTED, states);
             myState.put(ROLLBACK_BLC_ORDER_ID, seed.getOrder().getId());
             ActivityStateManagerImpl.getStateManager().registerState(this, context, getRollbackRegion(), getRollbackHandler(), myState);
         }
