@@ -19,16 +19,17 @@ import org.apache.commons.collections.CollectionUtils;
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
 import org.broadleafcommerce.inventory.domain.Inventory;
+import org.broadleafcommerce.inventory.domain.InventoryImpl;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-
-import java.util.List;
 
 @Repository("blInventoryDao")
 public class InventoryDaoImpl implements InventoryDao {
@@ -113,7 +114,7 @@ public class InventoryDaoImpl implements InventoryDao {
 
     @Override
     public Inventory readById(Long id) {
-        return em.find(Inventory.class, id);
+        return em.find(InventoryImpl.class, id);
     }
     
     @Override
