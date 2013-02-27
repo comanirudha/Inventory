@@ -15,22 +15,24 @@
  */
 package org.broadleafcommerce.inventory.admin.client.presenter;
 
+import org.broadleafcommerce.admin.client.datasource.catalog.product.module.SkuBasicClientEntityModule;
 import org.broadleafcommerce.inventory.admin.client.datasource.FulfillmentLocationDataSourceFactory;
 import org.broadleafcommerce.inventory.admin.client.datasource.InventoryDataSourceFactory;
-import org.broadleafcommerce.inventory.admin.client.datasource.InventorySkuDataSourceFactory;
 import org.broadleafcommerce.inventory.admin.client.view.FulfillmentLocationDisplay;
 import org.broadleafcommerce.openadmin.client.BLCMain;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.CustomCriteriaListGridDataSource;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.DynamicEntityDataSource;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.ListGridDataSource;
+import org.broadleafcommerce.openadmin.client.datasource.dynamic.module.DataSourceModule;
 import org.broadleafcommerce.openadmin.client.presenter.entity.DynamicEntityPresenter;
 import org.broadleafcommerce.openadmin.client.reflection.Instantiable;
+import org.broadleafcommerce.openadmin.client.service.AppServices;
 import org.broadleafcommerce.openadmin.client.setup.AsyncCallbackAdapter;
 import org.broadleafcommerce.openadmin.client.setup.PresenterSetupItem;
-import org.broadleafcommerce.openadmin.client.view.dynamic.dialog.EntitySearchDialog;
 
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
+import com.smartgwt.client.widgets.Canvas;
 
 public class FulfillmentLocationPresenter extends DynamicEntityPresenter implements Instantiable {
 
@@ -41,7 +43,7 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
         inventoryPresenter.load(selectedRecord, getPresenterSequenceSetupManager().getDataSource("inventoryDS"));
 
         String fulfillmentLocationId = selectedRecord.getAttribute("id");
-        CustomCriteriaListGridDataSource skuDS = (CustomCriteriaListGridDataSource) getPresenterSequenceSetupManager().getDataSource("skuDS");
+        CustomCriteriaListGridDataSource skuDS = (CustomCriteriaListGridDataSource) getSkuLookupDatasource();
         skuDS.setCustomCriteria(new String[]{skuDS.getCustomCriteria()[0], fulfillmentLocationId});
 
     }
@@ -73,18 +75,26 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
             }
         }));
 
-        //setup sku lookup
-        getPresenterSequenceSetupManager().addOrReplaceItem(new PresenterSetupItem("skuDS", new InventorySkuDataSourceFactory(), new AsyncCallbackAdapter() {
-            @Override
-            public void onSetupSuccess(DataSource result) {
-                ListGridDataSource ds = (ListGridDataSource) result;
-                ds.resetPermanentFieldVisibility("id", "name", "productOptionList");
-                ds.getField("id").setAttribute("order", 1);
-                DynamicEntityDataSource dataSource = getPresenterSequenceSetupManager().getDataSource("inventoryDS");
-                dataSource.getFormItemCallbackHandlerManager().addSearchFormItemCallback("sku", new EntitySearchDialog(ds), "Sku", null, null, null, dataSource);
-            }
-        }));
+    }
 
+    @Override
+    public void postSetup(Canvas container) {
+        //the Sku lookup only contains a simple BasicClientEntityModule. However, on fetch, we need to do specific filtering
+        //for the product option fields and thus need to swap it out with a custom datasource
+        DynamicEntityDataSource skuLookupDatasource = getSkuLookupDatasource();
+        DataSourceModule lookupModule = skuLookupDatasource.getModules()[0];
+        skuLookupDatasource.setModules(new DataSourceModule[] {
+                new SkuBasicClientEntityModule(
+                        lookupModule.getCeilingEntityFullyQualifiedClassname(),
+                        skuLookupDatasource.getPersistencePerspective(),
+                        AppServices.DYNAMIC_ENTITY)
+        });
+        super.postSetup(container);
+    }
+
+    public DynamicEntityDataSource getSkuLookupDatasource() {
+        String name = getDisplay().getInventoryDisplay().getGrid().getDataSource().getDataURL() + "_" + "sku" + "Lookup";
+        return getPresenterSequenceSetupManager().getDataSource(name);
     }
 
     @Override
