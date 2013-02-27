@@ -28,6 +28,8 @@ import org.broadleafcommerce.common.presentation.override.AdminPresentationOverr
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.catalog.domain.SkuImpl;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -43,8 +45,6 @@ import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import java.util.Date;
-
 @Entity
 @Table(name = "BLC_INVENTORY", uniqueConstraints = {@UniqueConstraint(columnNames = {"FULFILLMENT_LOCATION_ID", "SKU_ID"})})
 //@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region="blInventoryElements")
@@ -55,6 +55,7 @@ import java.util.Date;
         // It likely needs to be made additionally aware of parent exclusions. It already does this as part of the normal inspection process, but the override is happening after this step and I bet it's tweaking the desired exclusion.
         @AdminPresentationOverride(name = "sku.id", value = @AdminPresentation(friendlyName = "InventoryImpl_skuId", excluded = false, prominent = true, order = 1)),
         @AdminPresentationOverride(name = "sku.name", value = @AdminPresentation(friendlyName ="InventoryImpl_skuName", excluded = false, prominent = true, order = 2, visibility = VisibilityEnum.FORM_HIDDEN)),
+        @AdminPresentationOverride(name = "sku.description", value = @AdminPresentation(excluded = true)),
         @AdminPresentationOverride(name = "fulfillmentLocation.address.addressLine1", value = @AdminPresentation(excluded = true))
     }
 )
@@ -78,7 +79,7 @@ public class InventoryImpl implements Inventory {
     @ManyToOne(cascade = CascadeType.ALL, targetEntity = SkuImpl.class, optional = false)
     @JoinColumn(name = "SKU_ID", nullable = false)
     @AdminPresentation(friendlyName="Sku", group = "Sku", groupOrder = 1, order = 1)
-    @AdminPresentationToOneLookup()
+    @AdminPresentationToOneLookup(customCriteria = { "inventoryFilteredSkuList" })
     protected Sku sku;
 
     @Column(name = "QUANTITY_AVAILABLE", nullable = false)
@@ -112,6 +113,7 @@ public class InventoryImpl implements Inventory {
 
     @Version
     @Column(name = "VERSION_NUM", nullable = false)
+    @AdminPresentation(excluded = true)
     protected Long version;
 
     @Override
