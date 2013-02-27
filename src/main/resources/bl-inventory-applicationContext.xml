@@ -38,6 +38,8 @@
         </property>
     </bean>
     
+    <bean id="blAdminInventoryPersister" class="org.broadleafcommerce.inventory.admin.server.service.handler.AdminInventoryPersister" />
+    
     <!-- Workflows for site -->
     
     <bean id="blAddItemWorkflow" class="org.broadleafcommerce.core.workflow.SequenceProcessor">
