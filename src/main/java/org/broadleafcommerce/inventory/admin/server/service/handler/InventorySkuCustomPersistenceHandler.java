@@ -26,9 +26,6 @@ import org.broadleafcommerce.openadmin.client.dto.PersistencePackage;
 import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
 
-import java.io.Serializable;
-import java.util.List;
-
 import javax.annotation.Resource;
 
 public class InventorySkuCustomPersistenceHandler extends SkuCustomPersistenceHandler {
@@ -56,12 +53,6 @@ public class InventorySkuCustomPersistenceHandler extends SkuCustomPersistenceHa
     @Override
     public void applyAdditionalFetchCriteria(PersistentEntityCriteria queryCriteria, CriteriaTransferObject cto, PersistencePackage persistencePackage) {
         super.applyAdditionalFetchCriteria(queryCriteria, cto, persistencePackage);
-    }
-
-    @Override
-    public List<Serializable> filterFetchList(List<Serializable> skus, CriteriaTransferObject cto, PersistencePackage persistencePackage) {
-        //TODO filter this list by the fulfillment location id given in persistencePackage.getCustomCriteria()[0]
-        return super.filterFetchList(skus, cto, persistencePackage);
     }
 
 }
