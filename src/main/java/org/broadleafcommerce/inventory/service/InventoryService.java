@@ -39,6 +39,14 @@ import java.util.Map;
 public interface InventoryService {
 
     /**
+     * Tests whether an inventory check will be invoked for the given Sku.
+     * 
+     * @param sku
+     * @return
+     */
+    public boolean isSkuEligibleForInventoryCheck(Sku sku);
+
+    /**
      * Retrieves whether or not the quantity is available for a sku at all fulfillment locations.
      * @param sku the sku
      * @param quantity the amount for which to check; must be a positive integer

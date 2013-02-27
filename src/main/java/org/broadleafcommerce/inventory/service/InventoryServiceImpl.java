@@ -47,8 +47,44 @@ public class InventoryServiceImpl implements InventoryService {
     protected EntityConfiguration entityConfiguration;
 
     @Override
+    public boolean isSkuEligibleForInventoryCheck(Sku sku) {
+        if (sku.getInventoryType() == null
+                && (sku.getProduct().getDefaultCategory() == null
+                || sku.getProduct().getDefaultCategory().getInventoryType() == null)) {
+            return false;
+        } else if (InventoryType.NONE.equals(sku.getInventoryType())
+                || (sku.getProduct().getDefaultCategory() != null
+                && InventoryType.NONE.equals(sku.getProduct().getDefaultCategory().getInventoryType()))) {
+            return false;
+        } else if (InventoryType.BASIC.equals(sku.getInventoryType())
+                || (sku.getProduct().getDefaultCategory() != null
+                && InventoryType.BASIC.equals(sku.getProduct().getDefaultCategory().getInventoryType()))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean isQuantityAvailable(Sku sku, Integer quantity) {
-        return isQuantityAvailable(sku, quantity, null);
+        //if the sku does not exist or is not active, there is no quantity available
+        if (!sku.isActive()) {
+            return false;
+        }
+
+        if (!isSkuEligibleForInventoryCheck(sku)) {
+            //This sku is not eligible for inventory checks, so assume it is available
+            return true;
+        }
+
+        //quantity must be greater than 0
+        if (quantity == null || quantity < 0) {
+            throw new IllegalArgumentException("Quantity must be a positive integer");
+        }
+
+        Inventory inventory = inventoryDao.readInventoryForDefaultFulfillmentLocation(sku);
+
+        return inventory != null && inventory.getQuantityAvailable() >= quantity;
     }
 
     @Override
@@ -60,13 +96,8 @@ public class InventoryServiceImpl implements InventoryService {
             return false;
         }
 
-        if (sku.getInventoryType() == null
-                && (sku.getProduct().getDefaultCategory() == null
-                || sku.getProduct().getDefaultCategory().getInventoryType() == null)) {
-            return true;
-        } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                || (sku.getProduct().getDefaultCategory() != null
-                && InventoryType.NONE.equals(sku.getProduct().getDefaultCategory().getInventoryType()))){
+        if (!isSkuEligibleForInventoryCheck(sku)) {
+            //This sku is not eligible for inventory checks, so assume it is available
             return true;
         }
 
@@ -75,13 +106,7 @@ public class InventoryServiceImpl implements InventoryService {
             throw new IllegalArgumentException("Quantity must be a positive integer");
         }
 
-        Inventory inventory = null;
-
-        if (fulfillmentLocation == null) {
-            inventory = inventoryDao.readInventoryForDefaultFulfillmentLocation(sku);
-        } else {
-            inventory = inventoryDao.readInventory(sku, fulfillmentLocation);
-        }
+        Inventory inventory = inventoryDao.readInventory(sku, fulfillmentLocation);
 
         return inventory != null && inventory.getQuantityAvailable() >= quantity;
 
@@ -107,13 +132,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                    || (sku.getDefaultProduct().getDefaultCategory() != null
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))) {
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't adjust inventory for this Sku
                 continue;
             }
 
@@ -178,13 +198,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                    || (sku.getDefaultProduct().getDefaultCategory() != null
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))) {
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't check inventory for this Sku
                 continue;
             }
 
@@ -240,13 +255,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                    || (sku.getDefaultProduct().getDefaultCategory() != null
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))) {
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't adjust inventory for this Sku
                 continue;
             }
 
@@ -293,13 +303,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null 
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType()) 
-                    || (sku.getDefaultProduct().getDefaultCategory() != null 
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))){
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't adjust inventory for this Sku
                 continue;
             }
 
@@ -335,13 +340,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                    || (sku.getDefaultProduct().getDefaultCategory() != null
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))) {
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't adjust inventory for this Sku
                 continue;
             }
 
@@ -384,13 +384,8 @@ public class InventoryServiceImpl implements InventoryService {
             /*
              * If the inventory type of the sku or category is null or InventoryType.NONE, do not adjust inventory
              */
-            if (sku.getInventoryType() == null
-                    && (sku.getDefaultProduct().getDefaultCategory() == null
-                    || sku.getDefaultProduct().getDefaultCategory().getInventoryType() == null)) {
-                continue;
-            } else if (InventoryType.NONE.equals(sku.getInventoryType())
-                    || (sku.getDefaultProduct().getDefaultCategory() != null
-                    && InventoryType.NONE.equals(sku.getDefaultProduct().getDefaultCategory().getInventoryType()))) {
+            if (!isSkuEligibleForInventoryCheck(sku)) {
+                //Don't adjust inventory for this Sku
                 continue;
             }
 
