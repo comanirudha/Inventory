@@ -51,12 +51,14 @@ import javax.persistence.Version;
 @Inheritance(strategy = InheritanceType.JOINED)
 @AdminPresentationOverrides(
     {
-        //TODO this is needed because of a probable bug because Overrides are late stage in the inspection lifecycle.
-        // It likely needs to be made additionally aware of parent exclusions. It already does this as part of the normal inspection process, but the override is happening after this step and I bet it's tweaking the desired exclusion.
         @AdminPresentationOverride(name = "sku.id", value = @AdminPresentation(friendlyName = "InventoryImpl_skuId", excluded = false, prominent = true, order = 1)),
         @AdminPresentationOverride(name = "sku.name", value = @AdminPresentation(friendlyName ="InventoryImpl_skuName", excluded = false, prominent = true, order = 2, visibility = VisibilityEnum.FORM_HIDDEN)),
-        @AdminPresentationOverride(name = "sku.description", value = @AdminPresentation(excluded = true)),
-        @AdminPresentationOverride(name = "fulfillmentLocation.address.addressLine1", value = @AdminPresentation(excluded = true))
+        // These properties are declared as @AdminPresentationOverrides in either fulfillmentLocation or address, so we need
+        // to ensure they are excluded in Inventory's list of overrides
+        @AdminPresentationOverride(name = "fulfillmentLocation.address.addressLine1", value = @AdminPresentation(excluded = true)),
+        @AdminPresentationOverride(name = "fulfillmentLocation.address.phonePrimary.phoneNumber", value = @AdminPresentation(excluded = true)),
+        @AdminPresentationOverride(name = "fulfillmentLocation.address.phoneSecondary.phoneNumber", value = @AdminPresentation(excluded = true)),
+        @AdminPresentationOverride(name = "fulfillmentLocation.address.phoneFax.phoneNumber", value = @AdminPresentation(excluded = true))
     }
 )
 @AdminPresentationClass(populateToOneFields = PopulateToOneFieldsEnum.TRUE, friendlyName = "InventoryImpl_baseInventory")
