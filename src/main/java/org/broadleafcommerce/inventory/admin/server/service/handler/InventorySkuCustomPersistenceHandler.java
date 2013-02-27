@@ -15,45 +15,23 @@
  */
 package org.broadleafcommerce.inventory.admin.server.service.handler;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.exception.ServiceException;
-import org.broadleafcommerce.common.presentation.client.SupportedFieldType;
-import org.broadleafcommerce.common.presentation.client.VisibilityEnum;
-import org.broadleafcommerce.core.catalog.domain.ProductOptionValue;
-import org.broadleafcommerce.core.catalog.domain.Sku;
+import org.broadleafcommerce.admin.server.service.handler.SkuCustomPersistenceHandler;
 import org.broadleafcommerce.core.catalog.domain.SkuImpl;
 import org.broadleafcommerce.core.catalog.service.CatalogService;
-import org.broadleafcommerce.core.inventory.service.type.InventoryType;
-import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
-import org.broadleafcommerce.inventory.domain.FulfillmentLocationImpl;
 import org.broadleafcommerce.inventory.service.InventoryService;
-import org.broadleafcommerce.openadmin.client.dto.BasicFieldMetadata;
-import org.broadleafcommerce.openadmin.client.dto.ClassMetadata;
-import org.broadleafcommerce.openadmin.client.dto.DynamicResultSet;
-import org.broadleafcommerce.openadmin.client.dto.Entity;
-import org.broadleafcommerce.openadmin.client.dto.FieldMetadata;
-import org.broadleafcommerce.openadmin.client.dto.MergedPropertyType;
 import org.broadleafcommerce.openadmin.client.dto.PersistencePackage;
-import org.broadleafcommerce.openadmin.client.dto.PersistencePerspective;
-import org.broadleafcommerce.openadmin.client.dto.Property;
-import org.broadleafcommerce.openadmin.server.dao.DynamicEntityDao;
-import org.broadleafcommerce.openadmin.server.service.handler.CustomPersistenceHandlerAdapter;
-import org.broadleafcommerce.openadmin.server.service.persistence.module.InspectHelper;
-import org.broadleafcommerce.openadmin.server.service.persistence.module.RecordHelper;
 
+import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
 
-import java.util.HashMap;
+import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Resource;
 
-public class InventorySkuCustomPersistenceHandler extends CustomPersistenceHandlerAdapter {
+public class InventorySkuCustomPersistenceHandler extends SkuCustomPersistenceHandler {
 
     private static final Log LOG = LogFactory.getLog(InventorySkuCustomPersistenceHandler.class);
 
@@ -67,7 +45,7 @@ public class InventorySkuCustomPersistenceHandler extends CustomPersistenceHandl
     public Boolean canHandleInspect(PersistencePackage persistencePackage) {
         String className = persistencePackage.getCeilingEntityFullyQualifiedClassname();
         String[] customCriteria = persistencePackage.getCustomCriteria();
-        return customCriteria != null && customCriteria.length > 0 && Sku.class.getName().equals(className) && "filteredSkuList".equals(customCriteria[0]);
+        return customCriteria != null && customCriteria.length > 0 && SkuImpl.class.getName().equals(className) && "inventoryFilteredSkuList".equals(customCriteria[0]);
     }
 
     @Override
@@ -76,119 +54,14 @@ public class InventorySkuCustomPersistenceHandler extends CustomPersistenceHandl
     }
 
     @Override
-    public DynamicResultSet inspect(PersistencePackage persistencePackage, DynamicEntityDao dynamicEntityDao, InspectHelper helper) throws ServiceException {
-
-        try {
-
-            PersistencePerspective persistencePerspective = persistencePackage.getPersistencePerspective();
-            Map<MergedPropertyType, Map<String, FieldMetadata>> allMergedProperties = new HashMap<MergedPropertyType, Map<String, FieldMetadata>>();
-
-            //retrieve the default properties for the Sku
-            Map<String, FieldMetadata> properties = helper.getSimpleMergedProperties(Sku.class.getName(), persistencePerspective);
-
-            //create a new field to hold a list of all applicable product options for the sku
-            BasicFieldMetadata fieldMetadata = new BasicFieldMetadata();
-            fieldMetadata.setFieldType(SupportedFieldType.STRING);
-            fieldMetadata.setMutable(true);
-            fieldMetadata.setInheritedFromType(SkuImpl.class.getName());
-            fieldMetadata.setAvailableToTypes(new String[]{SkuImpl.class.getName()});
-            fieldMetadata.setForeignKeyCollection(false);
-            fieldMetadata.setMergedPropertyType(MergedPropertyType.PRIMARY);
-            fieldMetadata.setName("productOptionList");
-            fieldMetadata.setFriendlyName("Product Options");
-            fieldMetadata.setGroup("");
-            fieldMetadata.setOrder(3);
-            fieldMetadata.setExplicitFieldType(SupportedFieldType.STRING);
-            fieldMetadata.setProminent(true);
-            fieldMetadata.setBroadleafEnumeration("");
-            fieldMetadata.setReadOnly(false);
-            fieldMetadata.setVisibility(VisibilityEnum.VISIBLE_ALL);
-
-            properties.put("productOptionList", fieldMetadata);
-
-            properties.get("id").setOrder(1);
-            properties.get("name").setOrder(2);
-
-            allMergedProperties.put(MergedPropertyType.PRIMARY, properties);
-            Class<?>[] entityClasses = dynamicEntityDao.getAllPolymorphicEntitiesFromCeiling(Sku.class);
-            ClassMetadata mergedMetadata = helper.getMergedClassMetadata(entityClasses, allMergedProperties);
-
-            return new DynamicResultSet(mergedMetadata, null, null);
-
-        } catch (Exception e) {
-            String className = persistencePackage.getCeilingEntityFullyQualifiedClassname();
-            ServiceException ex = new ServiceException("Unable to retrieve inspection results for " + className, e);
-            LOG.error("Unable to retrieve inspection results for " + className, ex);
-            throw ex;
-        }
+    public void applyAdditionalFetchCriteria(PersistentEntityCriteria queryCriteria, CriteriaTransferObject cto, PersistencePackage persistencePackage) {
+        super.applyAdditionalFetchCriteria(queryCriteria, cto, persistencePackage);
     }
 
     @Override
-    public DynamicResultSet fetch(PersistencePackage persistencePackage, CriteriaTransferObject cto, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
-
-        String ceilingEntityFullyQualifiedClassname = persistencePackage.getCeilingEntityFullyQualifiedClassname();
-
-        try {
-
-            Long fulfillmentLocationId = Long.parseLong(persistencePackage.getCustomCriteria()[1]);
-            FulfillmentLocation fulfillmentLocation = (FulfillmentLocation) dynamicEntityDao.retrieve(FulfillmentLocationImpl.class, fulfillmentLocationId);
-            //TODO: Fix this!!!! This needs to be paginated or something.  This is a potential OutOfMemoryError!
-            List<Sku> skus = inventoryService.readSkusNotAtFulfillmentLocation(fulfillmentLocation);
-
-            // if any sku in this list does not have InventoryType.BASIC or if its parent category does not have
-            // InventoryType.BASIC, remove it from the list.
-            CollectionUtils.filter(skus, new Predicate() {
-                @Override
-                public boolean evaluate(Object object) {
-                    Sku sku = (Sku) object;
-                    return InventoryType.BASIC.equals(sku.getInventoryType()) ||
-                            (
-                                sku.getProduct().getDefaultCategory() != null &&
-                                InventoryType.BASIC.equals(sku.getProduct().getDefaultCategory().getInventoryType())
-                            );
-                }
-            });
-
-            PersistencePerspective persistencePerspective = persistencePackage.getPersistencePerspective();
-
-            //get the default properties from Sku hierarchy
-            Map<String, FieldMetadata> originalProps = helper.getSimpleMergedProperties(Sku.class.getName(), persistencePerspective);
-
-            //Convert Skus into the client-side Entity representation
-            Entity[] payload = helper.getRecords(originalProps, skus);
-            int totalRecords = skus.size();
-
-            //now fill out the relevant properties for the product options for the Skus that were returned
-
-            for (int i = 0; i < totalRecords; i++) {
-
-                Sku sku = skus.get(i);
-                Entity entity = payload[i];
-
-                List<ProductOptionValue> optionValues = sku.getProductOptionValues();
-                StringBuilder options = new StringBuilder("");
-
-                for (ProductOptionValue value : optionValues) {
-                    if (StringUtils.isNotBlank(options.toString())) {
-                        options.append("; ");
-                    }
-                    options.append(value.getProductOption().getAttributeName()).append(": ").append(value.getAttributeValue());
-                }
-
-                Property optionProperty = new Property();
-                optionProperty.setName("productOptionList");
-                optionProperty.setValue(options.toString());
-                entity.addProperty(optionProperty);
-
-            }
-
-            return new DynamicResultSet(payload, totalRecords);
-
-        } catch (Exception e) {
-            LOG.error("Unable to execute persistence activity", e);
-            throw new ServiceException("Unable to perform fetch for entity: "+ceilingEntityFullyQualifiedClassname, e);
-        }
-
+    public List<Serializable> filterFetchList(List<Serializable> skus, CriteriaTransferObject cto, PersistencePackage persistencePackage) {
+        //TODO filter this list by the fulfillment location id given in persistencePackage.getCustomCriteria()[0]
+        return super.filterFetchList(skus, cto, persistencePackage);
     }
 
 }
