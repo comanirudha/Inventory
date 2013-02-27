@@ -32,6 +32,18 @@ public interface FulfillmentLocation extends Serializable {
     public void setId(Long id);
 
     /**
+     * For convenience you can name an inventory location.
+     * @return
+     */
+    public String getName();
+
+    /**
+     * For convenience you can name an inventory location.
+     * @param name
+     */
+    public void setName(String name);
+
+    /**
      * Get the @link Address of the fulfillment location
      * @return the @link Address of the fulfillment location
      */

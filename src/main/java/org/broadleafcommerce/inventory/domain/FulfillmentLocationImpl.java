@@ -59,6 +59,10 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     @Column(name = "FULFILLMENT_LOCATION_ID")
     protected Long id;
 
+    @Column(name = "LOCATION_NAME", nullable = true)
+    @AdminPresentation(friendlyName = "FulfillmentLocationImpl_name", prominent = true, group = "FulfillmentLocationImpl_generalGroupName", groupOrder = 1)
+    protected String name;
+
     @ManyToOne(cascade = CascadeType.ALL, targetEntity = AddressImpl.class, optional = false)
     @JoinColumn(name = "ADDRESS_ID")
     protected Address address;
@@ -123,5 +127,15 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     @Override
     public void setDefaultLocation(Boolean defaultLocation) {
         this.defaultLocation = defaultLocation;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 }
