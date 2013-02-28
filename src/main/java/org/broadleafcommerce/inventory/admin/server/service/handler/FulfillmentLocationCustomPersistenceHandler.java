@@ -59,11 +59,12 @@ public class FulfillmentLocationCustomPersistenceHandler extends CustomPersisten
             Map<String, FieldMetadata> adminProperties = helper.getSimpleMergedProperties(FulfillmentLocation.class.getName(), persistencePerspective);
             adminInstance = (FulfillmentLocation) helper.createPopulatedInstance(adminInstance, entity, adminProperties, false);
 
+            //save the inventory instance first to give it an ID
+            adminInstance = (FulfillmentLocation) dynamicEntityDao.merge(adminInstance);
+
             if (adminInstance.getDefaultLocation()) {
                 fulfillmentLocationService.updateOtherDefaultLocationToFalse(adminInstance);
             }
-
-            adminInstance = (FulfillmentLocation) dynamicEntityDao.merge(adminInstance);
 
             return helper.getRecord(adminProperties, adminInstance, null, null);
         } catch (Exception e) {

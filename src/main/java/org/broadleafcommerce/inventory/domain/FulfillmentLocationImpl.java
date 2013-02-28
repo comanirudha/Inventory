@@ -76,7 +76,7 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     protected Boolean shippingLocation = Boolean.TRUE;
 
     @Column(name = "DEFAULT_LOCATION", nullable = false)
-    @AdminPresentation(friendlyName = "FulfillmentLocationImpl_defaultLocation", prominent = true, group = "FulfillmentLocationImpl_generalGroupName", groupOrder = 1)
+    @AdminPresentation(friendlyName = "FulfillmentLocationImpl_defaultLocation", helpText = "defaultLocationHelp", prominent = true, group = "FulfillmentLocationImpl_generalGroupName", groupOrder = 1)
     protected Boolean defaultLocation = Boolean.FALSE;
 
     @Override
