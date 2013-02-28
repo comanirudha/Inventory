@@ -74,7 +74,25 @@ public class FulfillmentLocationCustomPersistenceHandler extends CustomPersisten
 
     @Override
     public Entity update(PersistencePackage persistencePackage, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
-        throw new ServiceException("Update not supported");
+        Entity entity = persistencePackage.getEntity();
+        try {
+            PersistencePerspective persistencePerspective = persistencePackage.getPersistencePerspective();
+            Map<String, FieldMetadata> adminProperties = helper.getSimpleMergedProperties(FulfillmentLocation.class.getName(), persistencePerspective);
+            Object primaryKey = helper.getPrimaryKey(entity, adminProperties);
+            FulfillmentLocation adminInstance = (FulfillmentLocation) dynamicEntityDao.retrieve(Class.forName(entity.getType()[0]), primaryKey);
+            adminInstance = (FulfillmentLocation) helper.createPopulatedInstance(adminInstance, entity, adminProperties, false);
+
+            if (adminInstance.getDefaultLocation()) {
+                fulfillmentLocationService.updateOtherDefaultLocationToFalse(adminInstance);
+            }
+
+            adminInstance = (FulfillmentLocation) dynamicEntityDao.merge(adminInstance);
+
+            return helper.getRecord(adminProperties, adminInstance, null, null);
+        } catch (Exception e) {
+            LOG.error("Unable to update entity for " + entity.getType()[0], e);
+            throw new ServiceException("Unable to update entity for " + entity.getType()[0], e);
+        }
     }
 
 }
