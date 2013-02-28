@@ -30,7 +30,6 @@ import org.broadleafcommerce.core.catalog.domain.SkuImpl;
 
 import java.util.Date;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -73,12 +72,12 @@ public class InventoryImpl implements Inventory {
     @Column(name = "INVENTORY_ID")
     protected Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL, targetEntity = FulfillmentLocationImpl.class, optional = false)
+    @ManyToOne(targetEntity = FulfillmentLocationImpl.class, optional = false)
     @JoinColumn(name = "FULFILLMENT_LOCATION_ID", nullable = false)
     @AdminPresentation(excluded=true, visibility = VisibilityEnum.HIDDEN_ALL)
     protected FulfillmentLocation fulfillmentLocation;
 
-    @ManyToOne(cascade = CascadeType.ALL, targetEntity = SkuImpl.class, optional = false)
+    @ManyToOne(targetEntity = SkuImpl.class, optional = false)
     @JoinColumn(name = "SKU_ID", nullable = false)
     @AdminPresentation(friendlyName="Sku", group = "Sku", groupOrder = 1, order = 1)
     @AdminPresentationToOneLookup(customCriteria = { "inventoryFilteredSkuList" })
