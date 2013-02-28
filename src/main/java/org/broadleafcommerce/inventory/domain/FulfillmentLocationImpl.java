@@ -23,11 +23,15 @@ import org.broadleafcommerce.common.presentation.override.AdminPresentationOverr
 import org.broadleafcommerce.common.presentation.override.AdminPresentationOverrides;
 import org.broadleafcommerce.profile.core.domain.Address;
 import org.broadleafcommerce.profile.core.domain.AddressImpl;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -35,6 +39,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -78,6 +83,10 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
     @Column(name = "DEFAULT_LOCATION", nullable = false)
     @AdminPresentation(friendlyName = "FulfillmentLocationImpl_defaultLocation", helpText = "defaultLocationHelp", prominent = true, group = "FulfillmentLocationImpl_generalGroupName", groupOrder = 1)
     protected Boolean defaultLocation = Boolean.FALSE;
+
+    @OneToMany(targetEntity = InventoryImpl.class, mappedBy = "fulfillmentLocation", fetch = FetchType.LAZY, cascade = { CascadeType.REMOVE })
+    @BatchSize(size = 50)
+    protected List<Inventory> inventoryList;
 
     @Override
     public Long getId() {
