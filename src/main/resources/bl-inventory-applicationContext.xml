@@ -34,6 +34,7 @@
             <list>
                 <bean class="org.broadleafcommerce.inventory.admin.server.service.handler.InventoryCustomPersistenceHandler"/>
                 <bean class="org.broadleafcommerce.inventory.admin.server.service.handler.InventorySkuCustomPersistenceHandler"/>
+                <bean class="org.broadleafcommerce.inventory.admin.server.service.handler.FulfillmentLocationCustomPersistenceHandler"/>
             </list>
         </property>
     </bean>
