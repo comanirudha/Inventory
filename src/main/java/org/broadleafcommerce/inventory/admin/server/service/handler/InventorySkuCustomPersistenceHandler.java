@@ -20,10 +20,20 @@ import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.admin.server.service.handler.SkuCustomPersistenceHandler;
 import org.broadleafcommerce.core.catalog.domain.SkuImpl;
 import org.broadleafcommerce.core.catalog.service.CatalogService;
+import org.broadleafcommerce.inventory.domain.InventoryImpl;
 import org.broadleafcommerce.inventory.service.InventoryService;
 import org.broadleafcommerce.openadmin.client.dto.PersistencePackage;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 
+import com.anasoft.os.daofusion.criteria.AssociationPath;
+import com.anasoft.os.daofusion.criteria.FilterCriterion;
+import com.anasoft.os.daofusion.criteria.NestedPropertyCriteria;
 import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
+import com.anasoft.os.daofusion.criteria.SimpleFilterCriterionProvider;
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
 
 import javax.annotation.Resource;
@@ -53,6 +63,19 @@ public class InventorySkuCustomPersistenceHandler extends SkuCustomPersistenceHa
     @Override
     public void applyAdditionalFetchCriteria(PersistentEntityCriteria queryCriteria, CriteriaTransferObject cto, PersistencePackage persistencePackage) {
         super.applyAdditionalFetchCriteria(queryCriteria, cto, persistencePackage);
+        //grab the fulfillment location off of the custom criteria from the frontend
+        final Long locationId = Long.parseLong(persistencePackage.getCustomCriteria()[1]);
+        ((NestedPropertyCriteria) queryCriteria).add(
+                new FilterCriterion(AssociationPath.ROOT, "id", new SimpleFilterCriterionProvider() {
+                    @Override
+                    public Criterion getCriterion(String targetPropertyName, Object[] filterObjectValues, Object[] directValues) {
+                        DetachedCriteria locationSkuIds = DetachedCriteria.forClass(InventoryImpl.class)
+                                .add(Restrictions.eq("fulfillmentLocation.id", locationId))
+                                .setProjection(Projections.property("sku.id"));
+
+                        return Subqueries.propertyNotIn(targetPropertyName, locationSkuIds);
+                    }
+                }));
     }
 
 }
