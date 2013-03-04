@@ -220,7 +220,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
 
-            correctSkuProperties(entity, adminInstance.getSku(), helper);
+            correctSkuProperties(result, adminInstance.getSku(), helper);
 
             return result;
         } catch (Exception e) {
@@ -271,7 +271,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
 
-            correctSkuProperties(entity, adminInstance.getSku(), helper);
+            //correctSkuProperties(result, adminInstance.getSku(), helper);
 
             return result;
 
@@ -305,5 +305,3 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
     }
 
 }
-
-
