@@ -15,8 +15,10 @@
  */
 package org.broadleafcommerce.inventory.admin.server.service.handler;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.admin.server.service.handler.SkuCustomPersistenceHandler;
 import org.broadleafcommerce.common.exception.ServiceException;
 import org.broadleafcommerce.common.presentation.client.SupportedFieldType;
 import org.broadleafcommerce.common.presentation.client.VisibilityEnum;
@@ -34,12 +36,19 @@ import org.broadleafcommerce.openadmin.client.dto.FieldMetadata;
 import org.broadleafcommerce.openadmin.client.dto.MergedPropertyType;
 import org.broadleafcommerce.openadmin.client.dto.PersistencePackage;
 import org.broadleafcommerce.openadmin.client.dto.PersistencePerspective;
+import org.broadleafcommerce.openadmin.client.dto.Property;
+import org.broadleafcommerce.openadmin.server.cto.BaseCtoConverter;
 import org.broadleafcommerce.openadmin.server.dao.DynamicEntityDao;
 import org.broadleafcommerce.openadmin.server.service.handler.CustomPersistenceHandlerAdapter;
 import org.broadleafcommerce.openadmin.server.service.persistence.module.InspectHelper;
 import org.broadleafcommerce.openadmin.server.service.persistence.module.RecordHelper;
 
+import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
+import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
+
+import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -77,6 +86,10 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
         return canHandleUpdate(persistencePackage);
     }
 
+    public Boolean canHandleFetch(PersistencePackage persistencePackage) {
+        return canHandleUpdate(persistencePackage);
+    }
+
     @Override
     public DynamicResultSet inspect(PersistencePackage persistencePackage, DynamicEntityDao dynamicEntityDao, InspectHelper helper) throws ServiceException {
 
@@ -90,10 +103,10 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             
             //add in some helpful prompts to the user to tell them which fields they should be modifying
             BasicFieldMetadata availableMetadata = (BasicFieldMetadata) properties.get("quantityAvailable");
-            availableMetadata.setTooltip("In order to change inventory, add or subtract inventory using the 'Quantity Available Change' field. This number might not reflect" +
+            availableMetadata.setHelpText("In order to change inventory, add or subtract inventory using the 'Quantity Available Change' field. This number might not reflect" +
                     " the latest inventory in the system.");
             BasicFieldMetadata onHandMetadata = (BasicFieldMetadata) properties.get("quantityOnHand");
-            onHandMetadata.setTooltip("In order to change inventory, add or subtract inventory using the 'Quantity on hand Change' field. This number might not reflect" +
+            onHandMetadata.setHelpText("In order to change inventory, add or subtract inventory using the 'Quantity on hand Change' field. This number might not reflect" +
                     " the latest inventory in the system.");
 
             //create a new field to hold change in quantity available
@@ -106,7 +119,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             quantityAvailableChangeMetadata.setMergedPropertyType(MergedPropertyType.PRIMARY);
             quantityAvailableChangeMetadata.setName(QUANTITY_AVAILABLE_CHANGE_FIELD_NAME);
             quantityAvailableChangeMetadata.setFriendlyName("quantityAvailableChange");
-            quantityAvailableChangeMetadata.setTooltip("Quantity Available denotes what is currently in the system, but might not be the most" +
+            quantityAvailableChangeMetadata.setHelpText("Quantity Available denotes what is currently in the system, but might not be the most" +
                     " recent value. Because of this, the actual inventory cannot be explicitly set." +
                     " Modify this field to add or subtract inventory. A '1' denotes adding 1 item and a '-1' denotes subtracting 1 item.");
             quantityAvailableChangeMetadata.setGroup("Quantities");
@@ -141,6 +154,10 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             properties.put(QUANTITY_ON_HAND_CHANGE_FIELD_NAME, quantityOnHandChangeMetadata);
 
+            //add in the consolidated product options field
+            properties.put(SkuCustomPersistenceHandler.CONSOLIDATED_PRODUCT_OPTIONS_FIELD_NAME,
+                    SkuCustomPersistenceHandler.createConsolidatedOptionField(InventoryImpl.class));
+
             allMergedProperties.put(MergedPropertyType.PRIMARY, properties);
             Class<?>[] entityClasses = dynamicEntityDao.getAllPolymorphicEntitiesFromCeiling(Inventory.class);
             ClassMetadata mergedMetadata = helper.getMergedClassMetadata(entityClasses, allMergedProperties);
@@ -152,6 +169,48 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             ServiceException ex = new ServiceException("Unable to retrieve inspection results for " + className, e);
             LOG.error("Unable to retrieve inspection results for " + className, ex);
             throw ex;
+        }
+    }
+
+    public DynamicResultSet fetch(PersistencePackage persistencePackage, CriteriaTransferObject cto, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
+        String ceilingEntityFullyQualifiedClassname = persistencePackage.getCeilingEntityFullyQualifiedClassname();
+        try {
+            PersistencePerspective persistencePerspective = persistencePackage.getPersistencePerspective();
+            //get the default properties from Sku and its subclasses
+            Map<String, FieldMetadata> originalProps = helper.getSimpleMergedProperties(Inventory.class.getName(), persistencePerspective);
+
+            //Pull back the Skus based on the criteria from the client
+            BaseCtoConverter ctoConverter = helper.getCtoConverter(persistencePerspective, cto,
+                    ceilingEntityFullyQualifiedClassname, originalProps);
+            PersistentEntityCriteria queryCriteria = ctoConverter.convert(cto, ceilingEntityFullyQualifiedClassname);
+
+            List<Serializable> records = dynamicEntityDao.query(queryCriteria,
+                    Class.forName(persistencePackage.getCeilingEntityFullyQualifiedClassname()));
+
+            //Convert Inventory into the client-side Entity representation
+            Entity[] payload = helper.getRecords(originalProps, records);
+            for (int i = 0; i < payload.length; i++) {
+                Entity entity = payload[i];
+                Inventory inventory = (Inventory) records.get(i);
+                for (Property property : entity.getProperties()) {
+                    //if some of the sku properties are empty, use the getter
+                    if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
+                        String skuProperty = property.getName().substring("sku.".length());
+                        String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, inventory.getSku(), helper);
+                        property.setValue(value);
+                    }
+                }
+
+                //also fill out the consolidated product option values field that was added on the inspect
+                Property optionsProperty = SkuCustomPersistenceHandler.getConsolidatedOptionProperty(inventory.getSku().getProductOptionValues());
+                entity.addProperty(optionsProperty);
+            }
+
+            int totalRecords = helper.getTotalRecords(persistencePackage, cto, ctoConverter);
+
+            return new DynamicResultSet(null, payload, totalRecords);
+        } catch (Exception e) {
+            throw new ServiceException("There was a problem fetching inventory. See server logs for more details");
         }
     }
 
