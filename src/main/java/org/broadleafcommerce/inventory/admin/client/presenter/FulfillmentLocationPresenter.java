@@ -15,7 +15,6 @@
  */
 package org.broadleafcommerce.inventory.admin.client.presenter;
 
-import org.broadleafcommerce.admin.client.datasource.catalog.product.module.SkuBasicClientEntityModule;
 import org.broadleafcommerce.inventory.admin.client.datasource.FulfillmentLocationDataSourceFactory;
 import org.broadleafcommerce.inventory.admin.client.datasource.InventoryDataSourceFactory;
 import org.broadleafcommerce.inventory.admin.client.view.FulfillmentLocationDisplay;
@@ -23,16 +22,17 @@ import org.broadleafcommerce.openadmin.client.BLCMain;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.CustomCriteriaListGridDataSource;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.DynamicEntityDataSource;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.ListGridDataSource;
-import org.broadleafcommerce.openadmin.client.datasource.dynamic.module.DataSourceModule;
 import org.broadleafcommerce.openadmin.client.presenter.entity.DynamicEntityPresenter;
 import org.broadleafcommerce.openadmin.client.reflection.Instantiable;
-import org.broadleafcommerce.openadmin.client.service.AppServices;
 import org.broadleafcommerce.openadmin.client.setup.AsyncCallbackAdapter;
 import org.broadleafcommerce.openadmin.client.setup.PresenterSetupItem;
 
 import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
-import com.smartgwt.client.widgets.Canvas;
+import com.smartgwt.client.util.BooleanCallback;
+import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
 
 public class FulfillmentLocationPresenter extends DynamicEntityPresenter implements Instantiable {
 
@@ -51,6 +51,27 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
     @Override
     public void bind() {
         super.bind();
+        removeClickHandlerRegistration.removeHandler();
+        removeClickHandlerRegistration = display.getListDisplay().getRemoveButton().addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                if (event.isLeftButtonDown()) {
+                    String message = "Are your sure you want to delete this entity?";
+                    Boolean defaultLocation = display.getListDisplay().getGrid().getSelectedRecord().getAttributeAsBoolean("defaultLocation");
+                    if (defaultLocation) {
+                        message = BLCMain.getMessageManager().getString("deleteDefaultLocationPrompt");
+                    }
+                    SC.confirm(message, new BooleanCallback() {
+                        @Override
+                        public void execute(Boolean value) {
+                            if (value) {
+                                removeClicked();
+                            }
+                        }
+                    });
+                }
+            }
+        });
         inventoryPresenter.bind();
     }
 
@@ -75,21 +96,6 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
             }
         }));
 
-    }
-
-    @Override
-    public void postSetup(Canvas container) {
-        //the Sku lookup only contains a simple BasicClientEntityModule. However, on fetch, we need to do specific filtering
-        //for the product option fields and thus need to swap it out with a custom datasource
-        DynamicEntityDataSource skuLookupDatasource = getSkuLookupDatasource();
-        DataSourceModule lookupModule = skuLookupDatasource.getModules()[0];
-        skuLookupDatasource.setModules(new DataSourceModule[] {
-                new SkuBasicClientEntityModule(
-                        lookupModule.getCeilingEntityFullyQualifiedClassname(),
-                        skuLookupDatasource.getPersistencePerspective(),
-                        AppServices.DYNAMIC_ENTITY)
-        });
-        super.postSetup(container);
     }
 
     public DynamicEntityDataSource getSkuLookupDatasource() {
