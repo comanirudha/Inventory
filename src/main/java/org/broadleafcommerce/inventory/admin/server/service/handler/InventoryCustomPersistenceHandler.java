@@ -139,6 +139,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             quantityOnHandChangeMetadata.setMergedPropertyType(MergedPropertyType.PRIMARY);
             quantityOnHandChangeMetadata.setName(QUANTITY_ON_HAND_CHANGE_FIELD_NAME);
             quantityOnHandChangeMetadata.setFriendlyName("quantityOnHandChange");
+            quantityOnHandChangeMetadata.setHelpText("quantityOnHandChangeHelp");
             quantityOnHandChangeMetadata.setGroup("Quantities");
             quantityOnHandChangeMetadata.setOrder(4);
             quantityOnHandChangeMetadata.setExplicitFieldType(SupportedFieldType.INTEGER);
