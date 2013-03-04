@@ -85,7 +85,7 @@ public class InventoryImpl implements Inventory {
 
     @Column(name = "QUANTITY_AVAILABLE", nullable = false)
     @AdminPresentation(friendlyName = "InventoryImpl_quantityAvailable", prominent = true, group = "Quantities",
-            groupOrder = 2, order = 1, fieldType = SupportedFieldType.INTEGER,
+            groupOrder = 2, order = 1, fieldType = SupportedFieldType.INTEGER, helpText = "quantityAvailableHelp",
             validationConfigurations = {
                     @ValidationConfiguration(
                             validationImplementation="com.smartgwt.client.widgets.form.validator.IntegerRangeValidator",
@@ -98,7 +98,7 @@ public class InventoryImpl implements Inventory {
 
     @Column(name = "QUANTITY_ON_HAND", nullable = false)
     @AdminPresentation(friendlyName = "InventoryImpl_quantityOnHand", prominent = true, group = "Quantities",
-            groupOrder = 2, order = 2,
+            groupOrder = 2, order = 2, helpText = "quantityOnHandHelp",
             validationConfigurations = {
                     @ValidationConfiguration(
                             validationImplementation="com.smartgwt.client.widgets.form.validator.IntegerRangeValidator",

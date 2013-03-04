@@ -100,14 +100,6 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             //retrieve the default properties for Inventory
             Map<String, FieldMetadata> properties = helper.getSimpleMergedProperties(Inventory.class.getName(), persistencePerspective);
-            
-            //add in some helpful prompts to the user to tell them which fields they should be modifying
-            BasicFieldMetadata availableMetadata = (BasicFieldMetadata) properties.get("quantityAvailable");
-            availableMetadata.setHelpText("In order to change inventory, add or subtract inventory using the 'Quantity Available Change' field. This number might not reflect" +
-                    " the latest inventory in the system.");
-            BasicFieldMetadata onHandMetadata = (BasicFieldMetadata) properties.get("quantityOnHand");
-            onHandMetadata.setHelpText("In order to change inventory, add or subtract inventory using the 'Quantity on hand Change' field. This number might not reflect" +
-                    " the latest inventory in the system.");
 
             //create a new field to hold change in quantity available
             BasicFieldMetadata quantityAvailableChangeMetadata = new BasicFieldMetadata();
@@ -119,9 +111,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             quantityAvailableChangeMetadata.setMergedPropertyType(MergedPropertyType.PRIMARY);
             quantityAvailableChangeMetadata.setName(QUANTITY_AVAILABLE_CHANGE_FIELD_NAME);
             quantityAvailableChangeMetadata.setFriendlyName("quantityAvailableChange");
-            quantityAvailableChangeMetadata.setHelpText("Quantity Available denotes what is currently in the system, but might not be the most" +
-                    " recent value. Because of this, the actual inventory cannot be explicitly set." +
-                    " Modify this field to add or subtract inventory. A '1' denotes adding 1 item and a '-1' denotes subtracting 1 item.");
+            quantityAvailableChangeMetadata.setHelpText("quantityAvailableChangeHelp");
             quantityAvailableChangeMetadata.setGroup("Quantities");
             quantityAvailableChangeMetadata.setOrder(3);
             quantityAvailableChangeMetadata.setExplicitFieldType(SupportedFieldType.INTEGER);

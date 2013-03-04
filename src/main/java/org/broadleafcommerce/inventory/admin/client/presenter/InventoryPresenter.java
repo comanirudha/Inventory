@@ -92,7 +92,9 @@ public class InventoryPresenter extends CreateBasedListStructurePresenter {
                     initialValues.put("_type", type);
 
                     ds.getField("quantityAvailable").setCanEdit(true);
+                    ds.getField("quantityAvailable").setAttribute("helpText", BLCMain.getMessageManager().getString("quantityAvailableHelp"));
                     ds.getField("quantityOnHand").setCanEdit(true);
+                    ds.getField("quantityOnHand").setAttribute("helpText", BLCMain.getMessageManager().getString("quantityOnHandHelp"));
                     ds.getField("quantityAvailableChange").setAttribute("formHidden", FormHiddenEnum.HIDDEN);
                     ds.getField("quantityOnHandChange").setAttribute("formHidden", FormHiddenEnum.HIDDEN);
 
@@ -109,7 +111,9 @@ public class InventoryPresenter extends CreateBasedListStructurePresenter {
                     DynamicEntityDataSource ds = (DynamicEntityDataSource) display.getGrid().getDataSource();
 
                     ds.getField("quantityAvailable").setCanEdit(false);
+                    ds.getField("quantityAvailable").setAttribute("helpText", BLCMain.getMessageManager().getString("quantityAvailableEditHelp"));
                     ds.getField("quantityOnHand").setCanEdit(false);
+                    ds.getField("quantityOnHand").setAttribute("helpText", BLCMain.getMessageManager().getString("quantityOnHandEditHelp"));
                     ds.getField("quantityAvailableChange").setAttribute("formHidden", FormHiddenEnum.VISIBLE);
                     ds.getField("quantityOnHandChange").setAttribute("formHidden", FormHiddenEnum.VISIBLE);
                     //Add these new 'fake' attributes for the currently selected record so that they will be displayed
