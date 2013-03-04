@@ -22,6 +22,7 @@ import org.broadleafcommerce.admin.server.service.handler.SkuCustomPersistenceHa
 import org.broadleafcommerce.common.exception.ServiceException;
 import org.broadleafcommerce.common.presentation.client.SupportedFieldType;
 import org.broadleafcommerce.common.presentation.client.VisibilityEnum;
+import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.inventory.dao.InventoryDao;
 import org.broadleafcommerce.inventory.domain.Inventory;
 import org.broadleafcommerce.inventory.domain.InventoryImpl;
@@ -47,6 +48,7 @@ import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +121,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             quantityAvailableChangeMetadata.setFriendlyName("quantityAvailableChange");
             quantityAvailableChangeMetadata.setHelpText("quantityAvailableChangeHelp");
             quantityAvailableChangeMetadata.setGroup("Quantities");
-            quantityAvailableChangeMetadata.setOrder(3);
+            quantityAvailableChangeMetadata.setOrder(6);
             quantityAvailableChangeMetadata.setExplicitFieldType(SupportedFieldType.INTEGER);
             quantityAvailableChangeMetadata.setProminent(false);
             quantityAvailableChangeMetadata.setBroadleafEnumeration("");
@@ -141,7 +143,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             quantityOnHandChangeMetadata.setFriendlyName("quantityOnHandChange");
             quantityOnHandChangeMetadata.setHelpText("quantityOnHandChangeHelp");
             quantityOnHandChangeMetadata.setGroup("Quantities");
-            quantityOnHandChangeMetadata.setOrder(4);
+            quantityOnHandChangeMetadata.setOrder(7);
             quantityOnHandChangeMetadata.setExplicitFieldType(SupportedFieldType.INTEGER);
             quantityOnHandChangeMetadata.setProminent(false);
             quantityOnHandChangeMetadata.setBroadleafEnumeration("");
@@ -152,8 +154,9 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             properties.put(QUANTITY_ON_HAND_CHANGE_FIELD_NAME, quantityOnHandChangeMetadata);
 
             //add in the consolidated product options field
-            properties.put(SkuCustomPersistenceHandler.CONSOLIDATED_PRODUCT_OPTIONS_FIELD_NAME,
-                    SkuCustomPersistenceHandler.createConsolidatedOptionField(InventoryImpl.class));
+            FieldMetadata options = SkuCustomPersistenceHandler.createConsolidatedOptionField(InventoryImpl.class);
+            options.setOrder(3);
+            properties.put(SkuCustomPersistenceHandler.CONSOLIDATED_PRODUCT_OPTIONS_FIELD_NAME, options);
 
             allMergedProperties.put(MergedPropertyType.PRIMARY, properties);
             Class<?>[] entityClasses = dynamicEntityDao.getAllPolymorphicEntitiesFromCeiling(Inventory.class);
@@ -190,18 +193,8 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             for (int i = 0; i < payload.length; i++) {
                 Entity entity = payload[i];
                 Inventory inventory = (Inventory) records.get(i);
-                for (Property property : entity.getProperties()) {
-                    //if some of the sku properties are empty, use the getter
-                    if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
-                        String skuProperty = property.getName().substring("sku.".length());
-                        String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, inventory.getSku(), helper);
-                        property.setValue(value);
-                    }
-                }
 
-                //also fill out the consolidated product option values field that was added on the inspect
-                Property optionsProperty = SkuCustomPersistenceHandler.getConsolidatedOptionProperty(inventory.getSku().getProductOptionValues());
-                entity.addProperty(optionsProperty);
+                correctSkuProperties(entity, inventory.getSku(), helper);
             }
 
             int totalRecords = helper.getTotalRecords(persistencePackage, cto, ctoConverter);
@@ -227,15 +220,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
 
-            //Fill out the Sku properties again
-            for (Property property : result.getProperties()) {
-                //if some of the sku properties are empty, use the getter
-                if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
-                    String skuProperty = property.getName().substring("sku.".length());
-                    String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, adminInstance.getSku(), helper);
-                    property.setValue(value);
-                }
-            }
+            correctSkuProperties(entity, adminInstance.getSku(), helper);
 
             return result;
         } catch (Exception e) {
@@ -286,14 +271,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
 
-            for (Property property : result.getProperties()) {
-                //if some of the sku properties are empty, use the getter
-                if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
-                    String skuProperty = property.getName().substring("sku.".length());
-                    String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, adminInstance.getSku(), helper);
-                    property.setValue(value);
-                }
-            }
+            correctSkuProperties(entity, adminInstance.getSku(), helper);
 
             return result;
 
@@ -301,6 +279,29 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             LOG.error("Unable to update entity for " + entity.getType()[0], e);
             throw new ServiceException("Unable to update entity for " + entity.getType()[0], e);
         }
+    }
+
+    /**
+     * Ensures that Sku properties delegate to their getters as necessary as well as adds a new property
+     * for the consolidated product option values
+     * 
+     * @param entity
+     * @throws NoSuchMethodException 
+     * @throws InvocationTargetException 
+     * @throws IllegalAccessException 
+     */
+    protected void correctSkuProperties(Entity entity, Sku sku, RecordHelper helper) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        for (Property property : entity.getProperties()) {
+            //if some of the sku properties are empty, use the getter
+            if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
+                String skuProperty = property.getName().substring("sku.".length());
+                String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, sku, helper);
+                property.setValue(value);
+            }
+        }
+
+        Property optionsProperty = SkuCustomPersistenceHandler.getConsolidatedOptionProperty(sku.getProductOptionValues());
+        entity.addProperty(optionsProperty);
     }
 
 }
