@@ -92,7 +92,7 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
             @Override
             public void onSetupSuccess(DataSource result) {
                 inventoryPresenter = new InventoryPresenter(getDisplay().getInventoryDisplay(), BLCMain.getMessageManager().getString("newInventory"));
-                inventoryPresenter.setDataSource((CustomCriteriaListGridDataSource) result, new String[]{"sku.id", "sku.name", "quantityAvailable", "quantityOnHand"}, new Boolean[]{false, false, false, false});
+                inventoryPresenter.setDataSource((CustomCriteriaListGridDataSource) result, new String[] { "sku.id", "sku.name", "consolidatedProductOptions", "quantityAvailable", "quantityOnHand" }, new Boolean[] { false, false, false, false, false });
             }
         }));
 
