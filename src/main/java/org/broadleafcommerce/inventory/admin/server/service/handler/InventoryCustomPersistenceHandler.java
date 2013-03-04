@@ -86,7 +86,13 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
         return canHandleUpdate(persistencePackage);
     }
 
+    @Override
     public Boolean canHandleFetch(PersistencePackage persistencePackage) {
+        return canHandleUpdate(persistencePackage);
+    }
+
+    @Override
+    public Boolean canHandleAdd(PersistencePackage persistencePackage) {
         return canHandleUpdate(persistencePackage);
     }
 
@@ -162,6 +168,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
         }
     }
 
+    @Override
     public DynamicResultSet fetch(PersistencePackage persistencePackage, CriteriaTransferObject cto, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
         String ceilingEntityFullyQualifiedClassname = persistencePackage.getCeilingEntityFullyQualifiedClassname();
         try {
@@ -205,6 +212,38 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
     }
 
     @Override
+    public Entity add(PersistencePackage persistencePackage, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
+        Entity entity = persistencePackage.getEntity();
+        try {
+            //Fill out the Sku instance from the form
+            PersistencePerspective persistencePerspective = persistencePackage.getPersistencePerspective();
+            Inventory adminInstance = (Inventory) Class.forName(entity.getType()[0]).newInstance();
+            Map<String, FieldMetadata> adminProperties = helper.getSimpleMergedProperties(Inventory.class.getName(), persistencePerspective);
+            adminInstance = (Inventory) helper.createPopulatedInstance(adminInstance, entity, adminProperties, false);
+
+            //persist the newly-created Inventory object
+            adminInstance = (Inventory) dynamicEntityDao.persist(adminInstance);
+
+            Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
+
+            //Fill out the Sku properties again
+            for (Property property : result.getProperties()) {
+                //if some of the sku properties are empty, use the getter
+                if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
+                    String skuProperty = property.getName().substring("sku.".length());
+                    String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, adminInstance.getSku(), helper);
+                    property.setValue(value);
+                }
+            }
+
+            return result;
+        } catch (Exception e) {
+            LOG.error("Unable to update entity for " + entity.getType()[0], e);
+            throw new ServiceException("Unable to update entity for " + entity.getType()[0], e);
+        }
+    }
+
+    @Override
     public Entity update(PersistencePackage persistencePackage, DynamicEntityDao dynamicEntityDao, RecordHelper helper) throws ServiceException {
 
         Entity entity  = persistencePackage.getEntity();
@@ -244,7 +283,18 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
                 return entity;
             }
 
-            return helper.getRecord(adminProperties, adminInstance, null, null);
+            Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
+
+            for (Property property : result.getProperties()) {
+                //if some of the sku properties are empty, use the getter
+                if (property.getName().startsWith("sku") && StringUtils.isEmpty(property.getValue())) {
+                    String skuProperty = property.getName().substring("sku.".length());
+                    String value = SkuCustomPersistenceHandler.getStringValueFromGetter(skuProperty, adminInstance.getSku(), helper);
+                    property.setValue(value);
+                }
+            }
+
+            return result;
 
         } catch (Exception e) {
             LOG.error("Unable to update entity for " + entity.getType()[0], e);
