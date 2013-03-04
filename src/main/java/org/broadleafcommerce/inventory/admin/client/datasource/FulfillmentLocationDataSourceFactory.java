@@ -19,7 +19,6 @@ import org.broadleafcommerce.admin.client.datasource.EntityImplementations;
 import org.broadleafcommerce.common.presentation.client.OperationType;
 import org.broadleafcommerce.openadmin.client.datasource.DataSourceFactory;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.ListGridDataSource;
-import org.broadleafcommerce.openadmin.client.datasource.dynamic.module.BasicClientEntityModule;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.module.DataSourceModule;
 import org.broadleafcommerce.openadmin.client.dto.ForeignKey;
 import org.broadleafcommerce.openadmin.client.dto.OperationTypes;
@@ -40,7 +39,7 @@ public class FulfillmentLocationDataSourceFactory implements DataSourceFactory {
             operationTypes = new OperationTypes(OperationType.BASIC, OperationType.BASIC, OperationType.BASIC, OperationType.BASIC, OperationType.BASIC);
             PersistencePerspective persistencePerspective = new PersistencePerspective(operationTypes, new String[]{}, new ForeignKey[]{new ForeignKey("address.state", EntityImplementations.STATE, null), new ForeignKey("address.country", EntityImplementations.COUNTRY, null)});
             DataSourceModule[] modules = new DataSourceModule[]{
-                    new BasicClientEntityModule(InventoryCeilingEntities.FULFILLMENT_LOCATION, persistencePerspective, AppServices.DYNAMIC_ENTITY)
+                    new FulfillmentLocationClientEntityModule(InventoryCeilingEntities.FULFILLMENT_LOCATION, persistencePerspective, AppServices.DYNAMIC_ENTITY)
             };
             ListGridDataSource dataSource = new ListGridDataSource(name, persistencePerspective, AppServices.DYNAMIC_ENTITY, modules);
             dataSource.buildFields(null, false, cb);
