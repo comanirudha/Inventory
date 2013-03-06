@@ -25,6 +25,8 @@ import org.broadleafcommerce.profile.core.domain.Address;
 import org.broadleafcommerce.profile.core.domain.AddressImpl;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 import java.util.List;
 
@@ -41,7 +43,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 @Entity
 @Table(name = "BLC_FULFILLMENT_LOCATION")
@@ -60,7 +61,13 @@ public class FulfillmentLocationImpl implements FulfillmentLocation {
 
     @Id
     @GeneratedValue(generator = "FulfillmentLocationId", strategy = GenerationType.TABLE)
-    @TableGenerator(name = "FulfillmentLocationId", table = "SEQUENCE_GENERATOR", pkColumnName = "ID_NAME", valueColumnName = "ID_VAL", pkColumnValue = "FulfillmentLocationImpl", allocationSize = 50)
+    @GenericGenerator(name = "FulfillmentLocationId", strategy = "org.broadleafcommerce.common.persistence.IdOverrideTableGenerator", parameters = {
+            @Parameter(name = "table_name", value = "SEQUENCE_GENERATOR"),
+            @Parameter(name = "segment_column_name", value = "ID_NAME"),
+            @Parameter(name = "value_column_name", value = "ID_VAL"),
+            @Parameter(name = "segment_value", value = "FulfillmentLocationImpl"),
+            @Parameter(name = "increment_size", value = "50"),
+            @Parameter(name = "entity_name", value = "org.broadleafcommerce.inventory.domain.FulfillmentLocation") })
     @Column(name = "FULFILLMENT_LOCATION_ID")
     protected Long id;
 
