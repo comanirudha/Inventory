@@ -27,6 +27,8 @@ import org.broadleafcommerce.common.presentation.override.AdminPresentationOverr
 import org.broadleafcommerce.common.presentation.override.AdminPresentationOverrides;
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.catalog.domain.SkuImpl;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 import java.util.Date;
 
@@ -40,7 +42,6 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
@@ -68,7 +69,13 @@ public class InventoryImpl implements Inventory {
 
     @Id
     @GeneratedValue(generator = "InventoryId", strategy = GenerationType.TABLE)
-    @TableGenerator(name = "InventoryId", table = "SEQUENCE_GENERATOR", pkColumnName = "ID_NAME", valueColumnName = "ID_VAL", pkColumnValue = "InventoryImpl", allocationSize = 50)
+    @GenericGenerator(name = "InventoryId", strategy = "org.broadleafcommerce.common.persistence.IdOverrideTableGenerator", parameters = {
+            @Parameter(name = "table_name", value = "SEQUENCE_GENERATOR"),
+            @Parameter(name = "segment_column_name", value = "ID_NAME"),
+            @Parameter(name = "value_column_name", value = "ID_VAL"),
+            @Parameter(name = "segment_value", value = "InventoryImpl"),
+            @Parameter(name = "increment_size", value = "50"),
+            @Parameter(name = "entity_name", value = "org.broadleafcommerce.inventory.domain.Inventory") })
     @Column(name = "INVENTORY_ID")
     protected Long id;
 
