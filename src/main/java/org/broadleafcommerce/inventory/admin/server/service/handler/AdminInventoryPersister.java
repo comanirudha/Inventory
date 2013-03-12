@@ -133,6 +133,9 @@ public class AdminInventoryPersister {
             return null;
         }
 
+        //avoid lazy initialization exceptions; initialize the ProductOptionValues for this Inventory's Sku
+        adminInstance.getSku().getProductOptionValues().size();
+
         return adminInstance;
     }
 
