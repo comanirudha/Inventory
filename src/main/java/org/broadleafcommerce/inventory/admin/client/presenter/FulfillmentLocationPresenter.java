@@ -31,6 +31,7 @@ import com.smartgwt.client.data.DataSource;
 import com.smartgwt.client.data.Record;
 import com.smartgwt.client.util.BooleanCallback;
 import com.smartgwt.client.util.SC;
+import com.smartgwt.client.widgets.Canvas;
 import com.smartgwt.client.widgets.events.ClickEvent;
 import com.smartgwt.client.widgets.events.ClickHandler;
 
@@ -96,6 +97,13 @@ public class FulfillmentLocationPresenter extends DynamicEntityPresenter impleme
             }
         }));
 
+    }
+
+    @Override
+    public void postSetup(Canvas container) {
+        super.postSetup(container);
+        //the lookup is not initialized until later in the presenter setup process which is why this has to come later
+        inventoryPresenter.setSkuLookupDatasource((ListGridDataSource) getSkuLookupDatasource());
     }
 
     public DynamicEntityDataSource getSkuLookupDatasource() {

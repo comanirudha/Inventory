@@ -18,6 +18,7 @@ package org.broadleafcommerce.inventory.admin.client.presenter;
 import org.broadleafcommerce.common.presentation.client.PersistencePerspectiveItemType;
 import org.broadleafcommerce.openadmin.client.BLCMain;
 import org.broadleafcommerce.openadmin.client.datasource.dynamic.DynamicEntityDataSource;
+import org.broadleafcommerce.openadmin.client.datasource.dynamic.ListGridDataSource;
 import org.broadleafcommerce.openadmin.client.dto.ForeignKey;
 import org.broadleafcommerce.openadmin.client.presenter.structure.CreateBasedListStructurePresenter;
 import org.broadleafcommerce.openadmin.client.view.dynamic.form.FormHiddenEnum;
@@ -39,8 +40,22 @@ import com.smartgwt.client.widgets.grid.events.SelectionEvent;
 
 public class InventoryPresenter extends CreateBasedListStructurePresenter {
 
+    protected ListGridDataSource skuLookupDatasource;
+
     public InventoryPresenter(GridStructureDisplay display, String editDialogTitle) {
         super("", display, editDialogTitle);
+    }
+
+    /**
+     * Must be set after the lookup has been initialized
+     * @param skuLookupDatasource
+     */
+    public void setSkuLookupDatasource(ListGridDataSource skuLookupDatasource) {
+        this.skuLookupDatasource = skuLookupDatasource;
+    }
+
+    public ListGridDataSource getSkuLookupDatasource() {
+        return skuLookupDatasource;
     }
 
     @Override
@@ -97,6 +112,12 @@ public class InventoryPresenter extends CreateBasedListStructurePresenter {
                     ds.getField("quantityOnHand").setAttribute("helpText", BLCMain.getMessageManager().getString("quantityOnHandHelp"));
                     ds.getField("quantityAvailableChange").setAttribute("formHidden", FormHiddenEnum.HIDDEN);
                     ds.getField("quantityOnHandChange").setAttribute("formHidden", FormHiddenEnum.HIDDEN);
+
+                    //don't cache the Sku list; I want to execute another fetch here since the Sku list is dependent upon that
+                    //Sku NOT being at this particular location. If I have already added a Sku then it shouldn't appear in
+                    //the list. Regardless, right before the add is displayed, clear the cache in order to always execute
+                    //a fetch
+                    skuLookupDatasource.getAssociatedGrid().invalidateCache();
 
                     BLCMain.ENTITY_ADD.editNewRecord(editDialogTitle, ds, initialValues, null, null, null);
                 }
