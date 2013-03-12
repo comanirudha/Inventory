@@ -19,10 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.admin.server.service.handler.SkuCustomPersistenceHandler;
+import org.broadleafcommerce.admin.server.service.handler.SkuPropertiesFilterCriterionProvider;
 import org.broadleafcommerce.common.exception.ServiceException;
 import org.broadleafcommerce.common.presentation.client.SupportedFieldType;
 import org.broadleafcommerce.common.presentation.client.VisibilityEnum;
 import org.broadleafcommerce.core.catalog.domain.Sku;
+import org.broadleafcommerce.core.catalog.service.CatalogService;
 import org.broadleafcommerce.inventory.dao.InventoryDao;
 import org.broadleafcommerce.inventory.domain.Inventory;
 import org.broadleafcommerce.inventory.domain.InventoryImpl;
@@ -72,6 +74,9 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
     @Resource(name = "blAdminInventoryPersister")
     protected AdminInventoryPersister inventoryPersister;
+
+    @Resource(name = "blCatalogService")
+    protected CatalogService catalogService;
 
     protected static final String QUANTITY_AVAILABLE_CHANGE_FIELD_NAME = "quantityAvailableChange";
     protected static final String QUANTITY_ON_HAND_CHANGE_FIELD_NAME = "quantityOnHandChange";
@@ -183,6 +188,8 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             //Pull back the Skus based on the criteria from the client
             BaseCtoConverter ctoConverter = helper.getCtoConverter(persistencePerspective, cto,
                     ceilingEntityFullyQualifiedClassname, originalProps);
+            //Inventory has Sku properties and I need to filter on them
+            ctoConverter.setFilterCriterionProviders(new SkuPropertiesFilterCriterionProvider("sku"));
             PersistentEntityCriteria queryCriteria = ctoConverter.convert(cto, ceilingEntityFullyQualifiedClassname);
 
             List<Serializable> records = dynamicEntityDao.query(queryCriteria,
@@ -270,8 +277,7 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
             }
 
             Entity result = helper.getRecord(adminProperties, adminInstance, null, null);
-
-            //correctSkuProperties(result, adminInstance.getSku(), helper);
+            correctSkuProperties(result, adminInstance.getSku(), helper);
 
             return result;
 
