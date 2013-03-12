@@ -92,6 +92,9 @@ public class FulfillmentLocationView extends HLayout implements Instantiable, Fu
 
         // create SubItemView for Inventory and set the Tab pane
         inventoryDisplay = new GridStructureView(BLCMain.getMessageManager().getString("inventoryListTitle"), false, true);
+        //enable filtering
+        inventoryDisplay.getGrid().setShowFilterEditor(true);
+        inventoryDisplay.getGrid().setCanSort(true);
         inventoryLayout.addMember(inventoryDisplay);
         inventoryTab.setPane(inventoryLayout);
 
