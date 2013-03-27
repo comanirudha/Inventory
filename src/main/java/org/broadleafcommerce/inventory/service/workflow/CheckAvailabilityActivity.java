@@ -24,13 +24,13 @@ import org.broadleafcommerce.core.order.service.OrderItemService;
 import org.broadleafcommerce.core.order.service.workflow.CartOperationContext;
 import org.broadleafcommerce.core.order.service.workflow.CartOperationRequest;
 import org.broadleafcommerce.core.workflow.BaseActivity;
-import org.broadleafcommerce.core.workflow.ProcessContext;
+import org.broadleafcommerce.core.workflow.ModuleActivity;
 import org.broadleafcommerce.inventory.exception.InventoryUnavailableException;
 import org.broadleafcommerce.inventory.service.InventoryService;
 
 import javax.annotation.Resource;
 
-public class CheckAvailabilityActivity extends BaseActivity {
+public class CheckAvailabilityActivity extends BaseActivity<CartOperationContext> implements ModuleActivity {
 
     @Resource(name = "blCatalogService")
     protected CatalogService catalogService;
@@ -41,9 +41,10 @@ public class CheckAvailabilityActivity extends BaseActivity {
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
 
-    public ProcessContext execute(ProcessContext context) throws Exception {
+    @Override
+    public CartOperationContext execute(CartOperationContext context) throws Exception {
 
-        CartOperationRequest request = ((CartOperationContext) context).getSeedData();
+        CartOperationRequest request = context.getSeedData();
         Long skuId = request.getItemRequest().getSkuId();
 
         Sku sku = null;
@@ -70,6 +71,11 @@ public class CheckAvailabilityActivity extends BaseActivity {
         }
         
         return context;
+    }
+    
+    @Override
+    public String getModuleName() {
+        return "broadleaf-inventory";
     }
 
 }

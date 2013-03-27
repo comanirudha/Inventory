@@ -36,7 +36,8 @@ public class InventoryRollbackHandler implements RollbackHandler {
     protected int maxRetries = 5;
 
     @Override
-    public void rollbackState(Activity activity, ProcessContext processContext, Map<String, Object> stateConfiguration) throws RollbackFailureException {
+    public void rollbackState(Activity<? extends ProcessContext> activity,
+            ProcessContext processContext, Map<String, Object> stateConfiguration) throws RollbackFailureException {
 
         if (stateConfiguration == null ||
                 (stateConfiguration.get(ROLLBACK_BLC_INVENTORY_DECREMENTED) == null &&

@@ -22,7 +22,7 @@ import org.broadleafcommerce.core.order.domain.BundleOrderItem;
 import org.broadleafcommerce.core.order.domain.DiscreteOrderItem;
 import org.broadleafcommerce.core.order.domain.OrderItem;
 import org.broadleafcommerce.core.workflow.BaseActivity;
-import org.broadleafcommerce.core.workflow.ProcessContext;
+import org.broadleafcommerce.core.workflow.ModuleActivity;
 import org.broadleafcommerce.core.workflow.state.ActivityStateManagerImpl;
 import org.broadleafcommerce.inventory.domain.FulfillmentLocation;
 import org.broadleafcommerce.inventory.exception.ConcurrentInventoryModificationException;
@@ -43,7 +43,7 @@ import javax.annotation.Resource;
  * @author Kelly Tisdell
  *
  */
-public class DecrementInventoryActivity extends BaseActivity {
+public class DecrementInventoryActivity extends BaseActivity<CheckoutContext> implements ModuleActivity {
 
     @Resource(name = "blInventoryService")
     protected InventoryService inventoryService;
@@ -59,9 +59,8 @@ public class DecrementInventoryActivity extends BaseActivity {
     }
 
     @Override
-    public ProcessContext execute(ProcessContext context) throws Exception {
-
-        CheckoutSeed seed = ((CheckoutContext) context).getSeedData();
+    public CheckoutContext execute(CheckoutContext context) throws Exception {
+        CheckoutSeed seed = context.getSeedData();
         List<OrderItem> orderItems = seed.getOrder().getOrderItems();
 
         //map to hold skus and quantity purchased
@@ -128,6 +127,11 @@ public class DecrementInventoryActivity extends BaseActivity {
 
     public void setMaxRetries(Integer maxRetries) {
         this.maxRetries = maxRetries;
+    }
+    
+    @Override
+    public String getModuleName() {
+        return "broadleaf-inventory";
     }
 
 }
