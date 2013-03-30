@@ -45,6 +45,7 @@ import org.broadleafcommerce.openadmin.server.dao.DynamicEntityDao;
 import org.broadleafcommerce.openadmin.server.service.handler.CustomPersistenceHandlerAdapter;
 import org.broadleafcommerce.openadmin.server.service.persistence.module.InspectHelper;
 import org.broadleafcommerce.openadmin.server.service.persistence.module.RecordHelper;
+import org.hibernate.Criteria;
 
 import com.anasoft.os.daofusion.criteria.PersistentEntityCriteria;
 import com.anasoft.os.daofusion.cto.client.CriteriaTransferObject;
@@ -187,14 +188,26 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
             //Pull back the Skus based on the criteria from the client
             BaseCtoConverter ctoConverter = helper.getCtoConverter(persistencePerspective, cto,
-                    ceilingEntityFullyQualifiedClassname, originalProps);
-            //Inventory has Sku properties and I need to filter on them
-            ctoConverter.setFilterCriterionProviders(new SkuPropertiesFilterCriterionProvider("sku"));
+                    ceilingEntityFullyQualifiedClassname, originalProps, new SkuPropertiesFilterCriterionProvider("sku"));
             PersistentEntityCriteria queryCriteria = ctoConverter.convert(cto, ceilingEntityFullyQualifiedClassname);
+            //attach the product option critiera
+            SkuCustomPersistenceHandler.applyProductOptionValueCriteria(queryCriteria, cto, persistencePackage, "sku");
+            
+            Criteria listCriteria = SkuCustomPersistenceHandler.getSkuCriteria(queryCriteria,
+                                                                   Class.forName(persistencePackage.getCeilingEntityFullyQualifiedClassname()),
+                                                                   dynamicEntityDao,
+                                                                   "sku");
+            List<Serializable> records = listCriteria.list();
 
-            List<Serializable> records = dynamicEntityDao.query(queryCriteria,
-                    Class.forName(persistencePackage.getCeilingEntityFullyQualifiedClassname()));
-
+            PersistentEntityCriteria countCriteria = helper.getCountCriteria(persistencePackage, cto, ctoConverter);
+            //Again, apply the product option criteria to get an accurate count
+            SkuCustomPersistenceHandler.applyProductOptionValueCriteria(countCriteria, cto, persistencePackage, "sku");
+            Criteria inventoryCountCriteria = SkuCustomPersistenceHandler.getSkuCriteria(countCriteria,
+                                                                    Class.forName(persistencePackage.getCeilingEntityFullyQualifiedClassname()),
+                                                                    dynamicEntityDao,
+                                                                    "sku");
+            int totalRecords = dynamicEntityDao.rowCount(inventoryCountCriteria);
+            
             //Convert Inventory into the client-side Entity representation
             Entity[] payload = helper.getRecords(originalProps, records);
             for (int i = 0; i < payload.length; i++) {
@@ -203,8 +216,6 @@ public class InventoryCustomPersistenceHandler extends CustomPersistenceHandlerA
 
                 correctSkuProperties(entity, inventory.getSku(), helper);
             }
-
-            int totalRecords = helper.getTotalRecords(persistencePackage, cto, ctoConverter);
 
             return new DynamicResultSet(null, payload, totalRecords);
         } catch (Exception e) {
