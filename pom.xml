@@ -12,7 +12,7 @@
     <artifactId>broadleaf-inventory</artifactId>
     <name>BroadleafCommerce Inventory</name>
     <description>Inventory extensions for the BroadleafCommerce Framework</description>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>2.2.1-SNAPSHOT</blc.version>
