@@ -15,7 +15,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>2.2.0-SNAPSHOT</blc.version>
+        <blc.version>2.2.1-SNAPSHOT</blc.version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/Inventory.git</connection>
